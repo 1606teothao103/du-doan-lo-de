@@ -5,34 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SỐ ĐỎ</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; text-align: center; background: #0f0c29; color: #fff; margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; overflow-x: hidden; }
-        .container { background: #16213e; width: 92%; max-width: 400px; padding: 20px; border-radius: 20px; box-shadow: 0 0 25px rgba(0, 255, 127, 0.15); border: 1px solid #1f4068; }
-        .station-info { background: #1a1a2e; padding: 10px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #f1c40f; font-size: 13px; }
-        #btnGet { background: #27ae60; color: white; border: none; padding: 12px; border-radius: 10px; font-size: 14px; cursor: pointer; width: 100%; margin-bottom: 15px; font-weight: bold; }
+        body { font-family: 'Segoe UI', sans-serif; text-align: center; background: #0f0c29; color: #fff; margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; overflow: hidden; }
+        .container { background: #16213e; width: 92%; max-width: 380px; padding: 20px; border-radius: 20px; box-shadow: 0 0 30px rgba(0, 255, 127, 0.2); border: 1px solid #1f4068; }
+        .station-info { background: #1a1a2e; padding: 10px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #f1c40f; font-size: 13px; color: #f1c40f; font-weight: bold; }
+        
+        #btnGet { background: #27ae60; color: white; border: none; padding: 12px; border-radius: 10px; font-size: 14px; cursor: pointer; width: 100%; margin-bottom: 15px; font-weight: bold; box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3); }
+        
         .input-row { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 15px; }
         .input-box { width: 32%; }
         label { font-size: 10px; color: #00d2ff; display: block; margin-bottom: 5px; font-weight: bold; }
         input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #1f4068; background: #0f3460; color: #fff; text-align: center; box-sizing: border-box; font-weight: bold; font-size: 22px; }
-        #main-result-box { background: #fff; margin: 15px auto; width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 5px solid #00ffcc; box-shadow: 0 0 15px #00ffcc; }
-        #main-result { font-size: 60px; font-weight: bold; color: #1a1a2e; }
+        
+        #main-result-box { background: #fff; margin: 15px auto; width: 115px; height: 115px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 5px solid #00ffcc; box-shadow: 0 0 20px #00ffcc; }
+        #main-result { font-size: 55px; font-weight: bold; color: #1a1a2e; }
+        
         .sub-results { display: flex; justify-content: space-around; margin: 15px 0; }
-        .sub-box { background: #1f4068; padding: 10px; border-radius: 10px; width: 80px; border: 1px solid #00d2ff; }
-        .sub-val { font-size: 22px; font-weight: bold; color: #f1c40f; }
+        .sub-box { background: #1f4068; padding: 8px; border-radius: 10px; width: 75px; border: 1px solid #00d2ff; }
+        .sub-val { font-size: 20px; font-weight: bold; color: #f1c40f; }
+        
         #btnQuay { background: linear-gradient(45deg, #00ffcc, #00d2ff); color: #1a1a2e; border: none; padding: 15px; border-radius: 12px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; }
-        #statusText { font-size: 13px; color: #ffcc00; margin-top: 15px; min-height: 35px; line-height: 1.4; }
+        #statusText { font-size: 13px; color: #ffcc00; margin-top: 15px; min-height: 35px; line-height: 1.4; display: flex; align-items: center; justify-content: center; font-weight: 500; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2 style="color: #00ffcc; margin: 0 0 15px 0;">DỰ ĐOÁN LÔ ĐỀ MIỀN NAM</h2>
-        <div class="station-info" id="station-info">📅 Đang xem lịch...</div>
+        <h2 style="color: #00ffcc; margin: 0 0 10px 0; font-size: 24px;">DỰ ĐOÁN LÔ ĐỀ MIỀN NAM</h2>
+        <div class="station-info" id="station-info">📅 Đang tải lịch...</div>
 
         <button id="btnGet" onclick="syncData()">📡 LẤY KẾT QUẢ MỚI NHẤT</button>
 
         <div class="input-row">
             <div class="input-box"><label>GIẢI 8</label><input type="text" id="g8" readonly placeholder="--"></div>
             <div class="input-box"><label>G.NHẤT</label><input type="text" id="g1" readonly placeholder="--"></div>
-<div class="input-box"><label>ĐẶC BIỆT</label><input type="text" id="gdb" readonly placeholder="--"></div>
+            <div class="input-box"><label>ĐẶC BIỆT</label><input type="text" id="gdb" readonly placeholder="--"></div>
         </div>
 
         <div id="main-result-box"><div id="main-result">??</div></div>
@@ -44,59 +49,57 @@
         </div>
         
         <button id="btnQuay" onclick="runAI()">BẮT ĐẦU DỰ ĐOÁN</button>
-        <p id="statusText">Chào mừng bạn!</p>
+        <p id="statusText">Hãy bấm nút kết nối phía trên!</p>
     </div>
 
     <script>
-        const GIST_RAW_URL = 'https://gist.githubusercontent.com/username/GIST_ID/raw/lottery.json';
+        // THÔNG TIN THÙNG THƯ (Thay bằng của bạn)
+        const GIST_URL = 'https://gist.githubusercontent.com/TÊN_GITHUB_CỦA_BẠN/ID_THÙNG_THƯ_GIST/raw/lottery.json';
 
         const days = ["Chủ Nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
-        document.getElementById('station-info').innerHTML = "📅 " + days[new Date().getDay()];
-
-        const funnyMessages = [
-            "❌ Xem giấy dò rồi nhấc cái tay lên mà gõ số vào đê!",
-            "❌ Không có số thì soi bằng niềm tin à?",
-            "❌ Admin chưa nạp số mới, tầm này soi gì bạn ơi!",
-            "❌ Hội đồng đang bận ăn cơm, đợi tí đi!"
-        ];
+        document.getElementById('station-info').innerHTML = "📅 " + days[new Date().getDay()] + " (Miền Nam)";
 
         async function syncData() {
             const status = document.getElementById('statusText');
-            status.innerHTML = "⏳ Đang kết nối máy chủ...";
+            status.innerHTML = "⏳ Đang kiểm tra dữ liệu...";
             
             try {
-                const response = await fetch(GIST_RAW_URL + '?t=' + new Date().getTime());
+                // Thêm ?t=... để tránh bị trình duyệt lưu lại kết quả cũ (Cache)
+                const response = await fetch(GIST_URL + '?t=' + Date.now());
                 const data = await response.json();
                 
                 const now = new Date();
-                const todayStr = now.toLocaleDateString('sv-SE');
+                const todayStr = now.toLocaleDateString('sv-SE'); // YYYY-MM-DD
                 const currentTime = now.getHours() * 100 + now.getMinutes();
 
-                // KHÓA: Sau 15h30 mà dữ liệu chưa phải ngày hôm nay
-                if (currentTime >= 1530 && data.date !== todayStr) {
-                    status.innerHTML = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
-                    resetInputs();
-                } else {
-                    document.getElementById('g8').value = data.g8;
-                    document.getElementById('g1').value = data.g1;
-                    document.getElementById('gdb').value = data.gdb;
-                    status.innerHTML = "✅ Đã đồng bộ số ngày " + data.date;
+                // NẾU SAU 15h30 (1530)
+                if (currentTime >= 1530) {
+                    // Nếu dữ liệu trên mạng chưa phải của ngày hôm nay
+                    if (data.date !== todayStr) {
+                        status.innerHTML = "❌ Không có số thì soi bằng niềm tin à?";
+                        document.getElementById('g8').value = "";
+                        return;
+                    }
                 }
-            } catch (err) { status.innerHTML = "❌ Lỗi kết nối. Thử lại sau!"; }
-        }
 
-        function resetInputs() {
-            document.getElementById('g8').value = "";
-            document.getElementById('g1').value = "";
-            document.getElementById('gdb').value = "";
+                // Nếu mọi thứ ổn, điền số vào ô
+                document.getElementById('g8').value = data.g8;
+                document.getElementById('g1').value = data.g1;
+                document.getElementById('gdb').value = data.gdb;
+                status.innerHTML = "✅ Đã nhận kết quả ngày " + data.date;
+                
+            } catch (err) {
+                status.innerHTML = "❌ Lỗi kết nối máy chủ!";
+            }
         }
 
         function runAI() {
             const g8 = document.getElementById('g8').value;
             if(!g8) {
-document.getElementById('statusText').innerHTML = "❌ Không có số thì soi bằng niềm tin à?";
+                document.getElementById('statusText').innerHTML = "❌ Không có số thì soi bằng niềm tin à?";
                 return;
             }
+            
             const btn = document.getElementById('btnQuay');
             btn.disabled = true;
             let count = 0;
@@ -105,11 +108,12 @@ document.getElementById('statusText').innerHTML = "❌ Không có số thì soi 
                 count++;
                 if (count > 25) {
                     clearInterval(timer);
-                    let final = (parseInt(g8) + 17) % 100;
+                    let seed = parseInt(g8);
+                    let final = (seed + 21) % 100; // Thuật toán của bạn
                     document.getElementById('main-result').innerHTML = final.toString().padStart(2,'0');
                     document.getElementById('s1').innerHTML = ((final + 1) % 100).toString().padStart(2,'0');
-                    document.getElementById('s2').innerHTML = ((final + 10) % 100).toString().padStart(2,'0');
-                    document.getElementById('s3').innerHTML = Math.abs(final - 5).toString().padStart(2,'0');
+                    document.getElementById('s2').innerHTML = ((final + 8) % 100).toString().padStart(2,'0');
+                    document.getElementById('s3').innerHTML = Math.abs(final - 3).toString().padStart(2,'0');
                     btn.disabled = false;
                 }
             }, 50);
