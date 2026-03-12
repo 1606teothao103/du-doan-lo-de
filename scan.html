@@ -2,51 +2,77 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Admin - Nạp Số Hệ Thống</title>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
-        body { font-family: sans-serif; background: #1a1a2e; color: #fff; text-align: center; padding: 20px; }
-        .box { background: #16213e; padding: 20px; border-radius: 15px; max-width: 400px; margin: auto; }
-        button { background: #27ae60; color: white; padding: 15px; border: none; border-radius: 10px; width: 100%; cursor: pointer; font-weight: bold; margin-top: 10px;}
+        body { font-family: sans-serif; background: #1a1a2e; color: #fff; text-align: center; padding: 20px; margin: 0; }
+        .box { background: #16213e; padding: 20px; border-radius: 15px; border: 2px solid #27ae60; }
+        input[type="file"] { margin: 20px 0; width: 100%; }
+        button { background: #27ae60; color: white; padding: 18px; border: none; border-radius: 12px; width: 100%; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 10px; box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3); }
+        .result-preview { background: #0f3460; padding: 15px; border-radius: 10px; margin-top: 20px; display: none; }
+        #status { color: #f1c40f; font-weight: bold; margin: 15px 0; }
     </style>
 </head>
 <body>
     <div class="box">
-        <h2>HỆ THỐNG NẠP SỐ 🚀</h2>
-        <input type="file" id="file-input" accept="image/*">
-        <p id="status">Quét ảnh xong nhấn "Cập Nhật Toàn Hệ Thống"</p>
-        <div id="result" style="display:none">
-            <p>G8: <span id="r8"></span> | G1: <span id="r1"></span> | ĐB: <span id="rdb"></span></p>
-            <button onclick="updateSystem()">📡 CẬP NHẬT TOÀN HỆ THỐNG</button>
+        <h2>ADMIN NẠP SỐ 📸</h2>
+        <p style="font-size: 13px; opacity: 0.8;">Chụp ảnh giấy dò sau 16h10</p>
+        
+        <input type="file" id="file-input" accept="image/*" capture="camera">
+        <div id="status">Đang chờ bạn chọn ảnh...</div>
+
+        <div class="result-preview" id="res-box">
+            <p>G8: <span id="r8">--</span> | G1: <span id="r1">--</span> | ĐB: <span id="rdb">--</span></p>
+            <button onclick="updateToSystem()">📡 CẬP NHẬT HỆ THỐNG</button>
         </div>
     </div>
 
     <script>
-        let currentNums = {};
+        // THAY THÔNG TIN CỦA BẠN VÀO ĐÂY
+        const GITHUB_TOKEN = 'GH_TOKEN_CỦA_BẠN'; // Bạn cần tạo Personal Access Token trên GitHub
+        const GIST_ID = 'GIST_ID_CỦA_BẠN'; 
+
         const fileInput = document.getElementById('file-input');
         fileInput.addEventListener('change', async (e) => {
-            document.getElementById('status').innerHTML = "⏳ AI đang đọc...";
-            const result = await Tesseract.recognize(e.target.files[0], 'eng');
-            const nums = result.data.text.match(/\d+/g);
-            if(nums && nums.length >= 3) {
-                currentNums = {
-                    g8: nums[0].slice(-2),
-                    g1: nums[1].slice(-2),
-                    gdb: nums[nums.length-1].slice(-2),
-                    date: new Date().toLocaleDateString('sv-SE') // Định dạng YYYY-MM-DD
-                };
-                document.getElementById('r8').innerText = currentNums.g8;
-                document.getElementById('r1').innerText = currentNums.g1;
-                document.getElementById('rdb').innerText = currentNums.gdb;
-                document.getElementById('result').style.display = "block";
-                document.getElementById('status').innerHTML = "✅ Quét xong! Hãy cập nhật.";
-            }
+            const status = document.getElementById('status');
+            status.innerHTML = "⏳ AI đang đọc ảnh... chờ tí!";
+            
+            try {
+                const result = await Tesseract.recognize(e.target.files[0], 'eng');
+                const nums = result.data.text.match(/\d+/g);
+                if(nums && nums.length >= 3) {
+                    document.getElementById('r8').innerText = nums[0].slice(-2);
+                    document.getElementById('r1').innerText = nums[1].slice(-2);
+                    document.getElementById('rdb').innerText = nums[nums.length-1].slice(-2);
+                    document.getElementById('res-box').style.display = "block";
+                    status.innerHTML = "✅ Đã đọc được số! Nhấn Cập nhật nhé.";
+                }
+            } catch (err) { status.innerHTML = "❌ Lỗi đọc ảnh. Thử chụp lại rõ hơn!"; }
         });
 
-        function updateSystem() {
-            // Lưu vào LocalStorage để trang Index cùng trình duyệt có thể đọc (Nếu bạn dùng chung máy)
-            localStorage.setItem('lottery_data', JSON.stringify(currentNums));
-            alert("✅ Đã cập nhật số mới cho ngày hôm nay!");
+        async function updateToSystem() {
+const status = document.getElementById('status');
+            status.innerHTML = "⏳ Đang đẩy số lên hệ thống...";
+            
+            const data = {
+                g8: document.getElementById('r8').innerText,
+                g1: document.getElementById('r1').innerText,
+                gdb: document.getElementById('rdb').innerText,
+                date: new Date().toLocaleDateString('sv-SE')
+            };
+
+            try {
+                const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `token ${GITHUB_TOKEN}` },
+                    body: JSON.stringify({ files: { "lottery.json": { content: JSON.stringify(data) } } })
+                });
+                if(response.ok) {
+                    status.innerHTML = "🚀 THÀNH CÔNG! Bạn bè có thể lấy số rồi.";
+                    alert("Đã cập nhật số mới!");
+                }
+            } catch (err) { status.innerHTML = "❌ Lỗi kết nối GitHub!"; }
         }
     </script>
 </body>
