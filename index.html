@@ -7,36 +7,42 @@
     <style>
         body { font-family: 'Segoe UI', sans-serif; text-align: center; background: #0f0c29; color: #fff; margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
         .container { background: #16213e; width: 92%; max-width: 400px; padding: 25px; border-radius: 20px; box-shadow: 0 0 30px rgba(0, 255, 127, 0.2); border: 1px solid #1f4068; box-sizing: border-box; }
-        .station-info { background: #1a1a2e; padding: 12px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #f1c40f; font-size: 14px; }
-        .input-row { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 20px; }
+        .station-info { background: #1a1a2e; padding: 12px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #f1c40f; font-size: 14px; }
+        
+        /* Nút lấy dữ liệu mới */
+        #btnGet { background: #27ae60; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-size: 12px; cursor: pointer; margin-bottom: 15px; font-weight: bold; }
+        
+        .input-row { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 15px; }
         .input-box { width: 32%; }
         label { font-size: 10px; color: #00d2ff; display: block; margin-bottom: 5px; font-weight: bold; }
         input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #1f4068; background: #0f3460; color: #fff; text-align: center; box-sizing: border-box; font-weight: bold; font-size: 20px; }
+        
         #main-result-box { background: #fff; margin: 20px auto; width: 130px; height: 130px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 5px solid #00ffcc; box-shadow: 0 0 20px #00ffcc; }
         #main-result { font-size: 65px; font-weight: bold; color: #1a1a2e; }
+        
         .sub-results { display: flex; justify-content: space-around; margin: 20px 0; }
         .sub-box { background: #1f4068; padding: 10px; border-radius: 10px; width: 80px; border: 1px solid #00d2ff; }
         .sub-val { font-size: 24px; font-weight: bold; color: #f1c40f; }
-        button { background: linear-gradient(45deg, #00ffcc, #00d2ff); color: #1a1a2e; border: none; padding: 15px; border-radius: 12px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; transition: 0.2s; }
-        #btnSync { background: #27ae60; color: white; padding: 10px 15px; font-size: 12px; margin-bottom: 15px; width: auto; }
-        #statusText { font-size: 13px; color: #ffcc00; margin-top: 15px; font-weight: 500; min-height: 20px; }
+        
+        #btnQuay { background: linear-gradient(45deg, #00ffcc, #00d2ff); color: #1a1a2e; border: none; padding: 15px; border-radius: 12px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; }
+        #statusText { font-size: 13px; color: #ffcc00; margin-top: 15px; min-height: 32px; font-weight: 500; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2 style="color: #00ffcc; margin-top: 0;">DỰ ĐOÁN XỔ SỐ MIỀN NAM</h2>
-        
-        <div class="station-info" id="station-info">Đang chờ lệnh...</div>
+        <h2 style="color: #00ffcc; margin-top: 0;">DỰ ĐOÁN LÔ ĐỀ MIỀN NAM</h2>
+        <div class="station-info" id="station-info">Đang xác định đài...</div>
 
-        <button id="btnSync" onclick="autoReadLottery()">📡 TỰ ĐỘNG ĐIỀN SỐ</button>
+        <button id="btnGet" onclick="checkData()">📡 LẤY DỮ LIỆU KQXS</button>
 
         <div class="input-row">
-            <div class="input-box"><label>GIẢI 8</label><input type="text" id="g8" placeholder="--"></div>
-            <div class="input-box"><label>G.NHẤT</label><input type="text" id="g1" placeholder="--"></div>
-            <div class="input-box"><label>ĐẶC BIỆT</label><input type="text" id="gdb" placeholder="--"></div>
+            <div class="input-box"><label>GIẢI 8</label><input type="text" id="g8" readonly placeholder="--"></div>
+<div class="input-box"><label>G.NHẤT</label><input type="text" id="g1" readonly placeholder="--"></div>
+            <div class="input-box"><label>ĐẶC BIỆT</label><input type="text" id="gdb" readonly placeholder="--"></div>
         </div>
-<div id="main-result-box"><div id="main-result">??</div></div>
 
+        <div id="main-result-box"><div id="main-result">??</div></div>
+        
         <div class="sub-results">
             <div class="sub-box"><div class="sub-val" id="s1">--</div></div>
             <div class="sub-box"><div class="sub-val" id="s2">--</div></div>
@@ -44,58 +50,61 @@
         </div>
         
         <button id="btnQuay" onclick="runAI()">BẮT ĐẦU DỰ ĐOÁN</button>
-        <p id="statusText">Hệ thống sẵn sàng!</p>
+        <p id="statusText">Hãy bấm nút kết nối để lấy số!</p>
     </div>
 
     <script>
         const days = ["Chủ Nhật (Tiền Giang)", "Thứ 2 (TP.HCM)", "Thứ 3 (Vũng Tàu)", "Thứ 4 (Đồng Nai)", "Thứ 5 (Tây Ninh)", "Thứ 6 (Bình Dương)", "Thứ 7 (TP.HCM)"];
         document.getElementById('station-info').innerHTML = "📅 " + days[new Date().getDay()];
 
-        // Danh sách lời nhắc đã thêm câu của bạn vào cuối
         const funnyMessages = [
             "❌ Hội đồng đang bận ăn cơm, chưa quay đâu!",
-            "❌ Thần tài đang đi tắm, quay lại sau 16h40 nhé!",
-            "❌ Lồng cầu đang bôi mỡ, đợi tí bạn ơi...",
-            "❌ Chưa có số đâu, đừng vội làm giàu!",
-            "❌ Sóng yếu quá, hay là bạn đi nạp tiền điện thoại đi?",
-            "❌ Xem giấy dò rồi nhấc cái tay lên mà gõ số vào đê!"
+            "❌ Thần tài đang đi tắm, quay lại sau đi!",
+            "❌ Xem giấy dò rồi nhấc cái tay lên mà gõ số vào đê!",
+            "❌ Kết quả cũ rích rồi, đợi Admin quét số mới đã!"
         ];
 
-        async function autoReadLottery() {
+        function checkData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const data = urlParams.get('data');
             const status = document.getElementById('statusText');
-            status.innerHTML = "⏳ Đang lén vào xem kết quả...";
             
-            try {
-                const response = await fetch("https://api.allorigins.win/get?url=" + encodeURIComponent("https://xskt.com.vn/rss-feed/mien-nam-xsmn.rss"));
-                const data = await response.json();
-                const content = data.contents;
+            const now = new Date();
+            const currentTime = now.getHours() * 100 + now.getMinutes();
 
-                const matchG8 = content.match(/G8:\s*(\d{2,})/);
-                const matchG1 = content.match(/G1:\s*(\d{2,})/);
-                const matchDB = content.match(/ĐB:\s*(\d{2,})/);
-
-                if (matchG8 && matchG1) {
-                    document.getElementById('g8').value = matchG8[1].slice(-2);
-                    document.getElementById('g1').value = matchG1[1].slice(-2);
-                    document.getElementById('gdb').value = matchDB[1].slice(-2);
-                    status.innerHTML = "✅ Đã điền số! Chiến ngay thôi!";
-                } else {
-                    throw new Error();
-                }
-            } catch (e) {
-                // Hiển thị ngẫu nhiên các câu nhắc dí dỏm
+            // 1. Kiểm tra thời gian: Sau 15h30 (1530)
+            if (currentTime >= 1530 && !data) {
                 status.innerHTML = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
-                document.getElementById('g8').value = "";
-                document.getElementById('g1').value = "";
-                document.getElementById('gdb').value = "";
+                resetInputs();
+                return;
+            }
+
+            // 2. Nếu có dữ liệu trong Link
+            if (data) {
+                const parts = data.split('-');
+                if(parts.length === 3) {
+                    document.getElementById('g8').value = parts[0];
+                    document.getElementById('g1').value = parts[1];
+                    document.getElementById('gdb').value = parts[2];
+                    status.innerHTML = "✅ Đã nhận số từ kqxs.vn! Chúc may mắn.";
+                }
+            } else {
+                status.innerHTML = "💤 Admin chưa gửi link mới, hoặc bạn đang vào link cũ rồi!";
+                resetInputs();
             }
         }
 
+        function resetInputs() {
+            document.getElementById('g8').value = "";
+            document.getElementById('g1').value = "";
+            document.getElementById('gdb').value = "";
+        }
+
         function runAI() {
-            const g8 = document.getElementById('g8').value;
-if(!g8) { 
-                document.getElementById('statusText').innerHTML = "⚠️ Không có số thì soi bằng niềm tin à?";
-                return; 
+const g8 = document.getElementById('g8').value;
+            if(!g8) {
+                document.getElementById('statusText').innerHTML = "⚠️ Chưa có số, soi bằng niềm tin à?";
+                return;
             }
             
             const btn = document.getElementById('btnQuay');
@@ -107,11 +116,11 @@ if(!g8) {
                 if (count > 30) {
                     clearInterval(timer);
                     let seed = parseInt(g8);
-                    let final = (seed + 13) % 100;
+                    let final = (seed + 19) % 100;
                     document.getElementById('main-result').innerHTML = final.toString().padStart(2,'0');
                     document.getElementById('s1').innerHTML = ((final + 1) % 100).toString().padStart(2,'0');
-                    document.getElementById('s2').innerHTML = ((final + 10) % 100).toString().padStart(2,'0');
-                    document.getElementById('s3').innerHTML = Math.abs(final - 5).toString().padStart(2,'0');
+                    document.getElementById('s2').innerHTML = ((final + 11) % 100).toString().padStart(2,'0');
+                    document.getElementById('s3').innerHTML = Math.abs(final - 2).toString().padStart(2,'0');
                     btn.disabled = false;
                 }
             }, 50);
