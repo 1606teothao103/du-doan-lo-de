@@ -2,58 +2,85 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Nạp Số Hệ Thống</title>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
         body { font-family: sans-serif; background: #1a1a2e; color: #fff; text-align: center; padding: 20px; margin: 0; }
-        .box { background: #16213e; padding: 20px; border-radius: 15px; border: 2px solid #27ae60; }
-        input[type="file"] { margin: 20px 0; width: 100%; }
-        button { background: #27ae60; color: white; padding: 18px; border: none; border-radius: 12px; width: 100%; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 10px; box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3); }
-        .result-preview { background: #0f3460; padding: 15px; border-radius: 10px; margin-top: 20px; display: none; }
-        #status { color: #f1c40f; font-weight: bold; margin: 15px 0; }
+        .box { background: #16213e; padding: 20px; border-radius: 15px; border: 2px solid #27ae60; max-width: 400px; margin: auto; }
+        
+        /* Nút chọn file đẹp hơn trên điện thoại */
+        .file-upload { 
+            display: inline-block; padding: 15px; background: #0f3460; border: 2px dashed #27ae60; 
+            border-radius: 10px; width: 100%; box-sizing: border-box; cursor: pointer; margin: 20px 0;
+        }
+        input[type="file"] { display: none; }
+        
+        button { 
+            background: #27ae60; color: white; padding: 18px; border: none; border-radius: 12px; 
+            width: 100%; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 10px;
+        }
+        #status { color: #f1c40f; font-weight: bold; margin: 15px 0; font-size: 14px; }
+        .preview-img { width: 100%; max-height: 200px; object-fit: contain; margin-top: 10px; border-radius: 10px; display: none; }
     </style>
 </head>
 <body>
     <div class="box">
-        <h2>ADMIN NẠP SỐ 📸</h2>
-        <p style="font-size: 13px; opacity: 0.8;">Chụp ảnh giấy dò sau 16h10</p>
+        <h2>HỆ THỐNG NẠP SỐ 🚀</h2>
+        <p style="font-size: 12px; opacity: 0.7;">Gửi ảnh kết quả để cập nhật dữ liệu</p>
         
-        <input type="file" id="file-input" accept="image/*" capture="camera">
-        <div id="status">Đang chờ bạn chọn ảnh...</div>
+        <label class="file-upload">
+            <span>📁 BẤM VÀO ĐÂY ĐỂ CHỌN ẢNH</span>
+            <input type="file" id="file-input" accept="image/*">
+        </label>
 
-        <div class="result-preview" id="res-box">
-            <p>G8: <span id="r8">--</span> | G1: <span id="r1">--</span> | ĐB: <span id="rdb">--</span></p>
-            <button onclick="updateToSystem()">📡 CẬP NHẬT HỆ THỐNG</button>
+        <img id="img-preview" class="preview-img">
+        <div id="status">Chưa có ảnh nào được chọn</div>
+
+        <div id="res-box" style="display: none; background: #0f3460; padding: 15px; border-radius: 10px; margin-top: 20px;">
+            <p style="margin: 5px 0;">G8: <span id="r8" style="color:#00ffcc; font-weight:bold;">--</span> | G1: <span id="r1" style="color:#00ffcc; font-weight:bold;">--</span> | ĐB: <span id="rdb" style="color:#00ffcc; font-weight:bold;">--</span></p>
+            <button onclick="updateToSystem()">📡 CẬP NHẬT TOÀN HỆ THỐNG</button>
         </div>
     </div>
 
     <script>
-        // THAY THÔNG TIN CỦA BẠN VÀO ĐÂY
-        const GITHUB_TOKEN = 'GH_TOKEN_CỦA_BẠN'; // Bạn cần tạo Personal Access Token trên GitHub
-        const GIST_ID = 'GIST_ID_CỦA_BẠN'; 
+        const GITHUB_TOKEN = 'YOUR_GITHUB_TOKEN'; 
+        const GIST_ID = 'YOUR_GIST_ID'; 
 
         const fileInput = document.getElementById('file-input');
+        const imgPreview = document.getElementById('img-preview');
+
         fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if(!file) return;
+
+            // Hiển thị ảnh vừa chọn
+            imgPreview.src = URL.createObjectURL(file);
+            imgPreview.style.display = "block";
+
             const status = document.getElementById('status');
-            status.innerHTML = "⏳ AI đang đọc ảnh... chờ tí!";
+            status.innerHTML = "🌀 AI đang đọc số từ ảnh...";
             
             try {
-                const result = await Tesseract.recognize(e.target.files[0], 'eng');
+                const result = await Tesseract.recognize(file, 'eng');
                 const nums = result.data.text.match(/\d+/g);
                 if(nums && nums.length >= 3) {
                     document.getElementById('r8').innerText = nums[0].slice(-2);
                     document.getElementById('r1').innerText = nums[1].slice(-2);
                     document.getElementById('rdb').innerText = nums[nums.length-1].slice(-2);
                     document.getElementById('res-box').style.display = "block";
-                    status.innerHTML = "✅ Đã đọc được số! Nhấn Cập nhật nhé.";
+                    status.innerHTML = "✅ Đã nhận diện xong!";
+                } else {
+                    status.innerHTML = "❌ Không tìm thấy số rõ ràng. Hãy chọn ảnh khác!";
                 }
-            } catch (err) { status.innerHTML = "❌ Lỗi đọc ảnh. Thử chụp lại rõ hơn!"; }
+            } catch (err) {
+                status.innerHTML = "❌ Lỗi đọc ảnh!";
+            }
         });
 
         async function updateToSystem() {
-const status = document.getElementById('status');
-            status.innerHTML = "⏳ Đang đẩy số lên hệ thống...";
+            const status = document.getElementById('status');
+            status.innerHTML = "⏳ Đang đồng bộ lên hệ thống...";
             
             const data = {
                 g8: document.getElementById('r8').innerText,
@@ -69,10 +96,10 @@ const status = document.getElementById('status');
                     body: JSON.stringify({ files: { "lottery.json": { content: JSON.stringify(data) } } })
                 });
                 if(response.ok) {
-                    status.innerHTML = "🚀 THÀNH CÔNG! Bạn bè có thể lấy số rồi.";
-                    alert("Đã cập nhật số mới!");
+                    status.innerHTML = "🚀 ĐÃ CẬP NHẬT XONG!";
+                    alert("Thành công! Bạn bè nhấn nút là thấy số mới.");
                 }
-            } catch (err) { status.innerHTML = "❌ Lỗi kết nối GitHub!"; }
+            } catch (err) { alert("Lỗi kết nối!"); }
         }
     </script>
 </body>
