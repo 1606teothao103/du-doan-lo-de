@@ -2,29 +2,29 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SỐ ĐỎ</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; text-align: center; background: #0f0c29; color: #fff; margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-        .container { background: #16213e; width: 92%; max-width: 400px; padding: 25px; border-radius: 20px; box-shadow: 0 0 30px rgba(0, 255, 127, 0.2); border: 1px solid #1f4068; box-sizing: border-box; }
-        .station-info { background: #1a1a2e; padding: 12px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #f1c40f; font-size: 14px; }
-        #btnGet { background: #27ae60; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-size: 12px; cursor: pointer; margin-bottom: 15px; font-weight: bold; }
+        body { font-family: 'Segoe UI', sans-serif; text-align: center; background: #0f0c29; color: #fff; margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; overflow-x: hidden; }
+        .container { background: #16213e; width: 92%; max-width: 400px; padding: 20px; border-radius: 20px; box-shadow: 0 0 25px rgba(0, 255, 127, 0.15); border: 1px solid #1f4068; }
+        .station-info { background: #1a1a2e; padding: 10px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #f1c40f; font-size: 13px; }
+        #btnGet { background: #27ae60; color: white; border: none; padding: 12px; border-radius: 10px; font-size: 14px; cursor: pointer; width: 100%; margin-bottom: 15px; font-weight: bold; }
         .input-row { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 15px; }
         .input-box { width: 32%; }
         label { font-size: 10px; color: #00d2ff; display: block; margin-bottom: 5px; font-weight: bold; }
-        input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #1f4068; background: #0f3460; color: #fff; text-align: center; box-sizing: border-box; font-weight: bold; font-size: 20px; }
-        #main-result-box { background: #fff; margin: 20px auto; width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 5px solid #00ffcc; box-shadow: 0 0 20px #00ffcc; }
+        input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #1f4068; background: #0f3460; color: #fff; text-align: center; box-sizing: border-box; font-weight: bold; font-size: 22px; }
+        #main-result-box { background: #fff; margin: 15px auto; width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 5px solid #00ffcc; box-shadow: 0 0 15px #00ffcc; }
         #main-result { font-size: 60px; font-weight: bold; color: #1a1a2e; }
-        .sub-results { display: flex; justify-content: space-around; margin: 20px 0; }
+        .sub-results { display: flex; justify-content: space-around; margin: 15px 0; }
         .sub-box { background: #1f4068; padding: 10px; border-radius: 10px; width: 80px; border: 1px solid #00d2ff; }
-        .sub-val { font-size: 24px; font-weight: bold; color: #f1c40f; }
+        .sub-val { font-size: 22px; font-weight: bold; color: #f1c40f; }
         #btnQuay { background: linear-gradient(45deg, #00ffcc, #00d2ff); color: #1a1a2e; border: none; padding: 15px; border-radius: 12px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; }
-        #statusText { font-size: 13px; color: #ffcc00; margin-top: 15px; min-height: 35px; font-weight: 500; display: flex; align-items: center; justify-content: center; padding: 0 10px; line-height: 1.4; }
+        #statusText { font-size: 13px; color: #ffcc00; margin-top: 15px; min-height: 35px; line-height: 1.4; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2 style="color: #00ffcc; margin-top: 0;">DỰ ĐOÁN LÔ ĐỀ MIỀN NAM</h2>
+        <h2 style="color: #00ffcc; margin: 0 0 15px 0;">DỰ ĐOÁN LÔ ĐỀ MIỀN NAM</h2>
         <div class="station-info" id="station-info">📅 Đang xem lịch...</div>
 
         <button id="btnGet" onclick="syncData()">📡 LẤY KẾT QUẢ MỚI NHẤT</button>
@@ -44,47 +44,45 @@
         </div>
         
         <button id="btnQuay" onclick="runAI()">BẮT ĐẦU DỰ ĐOÁN</button>
-        <p id="statusText">Hãy nhấn nút lấy kết quả!</p>
+        <p id="statusText">Chào mừng bạn!</p>
     </div>
 
     <script>
-        const days = ["Chủ Nhật (Tiền Giang)", "Thứ 2 (TP.HCM)", "Thứ 3 (Vũng Tàu)", "Thứ 4 (Đồng Nai)", "Thứ 5 (Tây Ninh)", "Thứ 6 (Bình Dương)", "Thứ 7 (TP.HCM)"];
+        const GIST_RAW_URL = 'https://gist.githubusercontent.com/username/GIST_ID/raw/lottery.json';
+
+        const days = ["Chủ Nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
         document.getElementById('station-info').innerHTML = "📅 " + days[new Date().getDay()];
 
         const funnyMessages = [
-            "❌ Hội đồng đang bận ăn cơm, chưa quay đâu!",
             "❌ Xem giấy dò rồi nhấc cái tay lên mà gõ số vào đê!",
             "❌ Không có số thì soi bằng niềm tin à?",
-            "❌ Tầm này chưa có số mới, đi uống trà đá đi rồi quay lại!",
-            "❌ Admin chưa nạp số, đừng có mà nhấn lấy số hoài!"
+            "❌ Admin chưa nạp số mới, tầm này soi gì bạn ơi!",
+            "❌ Hội đồng đang bận ăn cơm, đợi tí đi!"
         ];
 
-        function syncData() {
+        async function syncData() {
             const status = document.getElementById('statusText');
-            const now = new Date();
-            const todayStr = now.toLocaleDateString('sv-SE');
-            const currentTime = now.getHours() * 100 + now.getMinutes();
+            status.innerHTML = "⏳ Đang kết nối máy chủ...";
+            
+            try {
+                const response = await fetch(GIST_RAW_URL + '?t=' + new Date().getTime());
+                const data = await response.json();
+                
+                const now = new Date();
+                const todayStr = now.toLocaleDateString('sv-SE');
+                const currentTime = now.getHours() * 100 + now.getMinutes();
 
-            // Lấy dữ liệu lưu từ trang Scan (LocalStorage)
-            const savedData = JSON.parse(localStorage.getItem('lottery_data'));
-
-            // LOGIC KHÓA: Sau 15h30 mà dữ liệu chưa cập nhật ngày mới
-            if (currentTime >= 1530) {
-                if (!savedData || savedData.date !== todayStr) {
+                // KHÓA: Sau 15h30 mà dữ liệu chưa phải ngày hôm nay
+                if (currentTime >= 1530 && data.date !== todayStr) {
                     status.innerHTML = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
                     resetInputs();
-                    return;
+                } else {
+                    document.getElementById('g8').value = data.g8;
+                    document.getElementById('g1').value = data.g1;
+                    document.getElementById('gdb').value = data.gdb;
+                    status.innerHTML = "✅ Đã đồng bộ số ngày " + data.date;
                 }
-            }
-
-            if (savedData) {
-                document.getElementById('g8').value = savedData.g8;
-                document.getElementById('g1').value = savedData.g1;
-                document.getElementById('gdb').value = savedData.gdb;
-                status.innerHTML = "✅ Đã đồng bộ số ngày " + savedData.date;
-            } else {
-                status.innerHTML = "❌ Hệ thống chưa có dữ liệu. Đợi Admin nhé!";
-            }
+            } catch (err) { status.innerHTML = "❌ Lỗi kết nối. Thử lại sau!"; }
         }
 
         function resetInputs() {
@@ -95,23 +93,19 @@
 
         function runAI() {
             const g8 = document.getElementById('g8').value;
-const status = document.getElementById('statusText');
-
             if(!g8) {
-                status.innerHTML = "❌ Không có số thì soi bằng niềm tin à?";
+document.getElementById('statusText').innerHTML = "❌ Không có số thì soi bằng niềm tin à?";
                 return;
             }
-            
             const btn = document.getElementById('btnQuay');
             btn.disabled = true;
             let count = 0;
             const timer = setInterval(() => {
                 document.getElementById('main-result').innerHTML = Math.floor(Math.random()*100).toString().padStart(2,'0');
                 count++;
-                if (count > 30) {
+                if (count > 25) {
                     clearInterval(timer);
-                    let seed = parseInt(g8);
-                    let final = (seed + 13) % 100;
+                    let final = (parseInt(g8) + 17) % 100;
                     document.getElementById('main-result').innerHTML = final.toString().padStart(2,'0');
                     document.getElementById('s1').innerHTML = ((final + 1) % 100).toString().padStart(2,'0');
                     document.getElementById('s2').innerHTML = ((final + 10) % 100).toString().padStart(2,'0');
