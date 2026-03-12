@@ -2,117 +2,85 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Số Đỏ AI - Tự Động Lấy Kết Quả</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Số Đỏ AI - Mobile Pro</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; text-align: center; background: #0f0c29; color: #fff; padding: 20px 0; }
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            text-align: center; 
+            background: #0f0c29; 
+            color: #fff; 
+            margin: 0;
+            display: flex;
+            align-items: center; /* Căn giữa theo chiều dọc */
+            justify-content: center;
+            min-height: 100vh; /* Chiếm hết chiều cao màn hình */
+        }
         .container { 
-            background: #16213e; width: 420px; margin: auto; padding: 30px; border-radius: 20px; 
-            box-shadow: 0 0 30px rgba(0, 255, 127, 0.2); border: 1px solid #1f4068;
+            background: #16213e; 
+            width: 92%; 
+            max-width: 400px; 
+            padding: 25px; 
+            border-radius: 20px; 
+            box-shadow: 0 0 30px rgba(0, 255, 127, 0.2); 
+            border: 1px solid #1f4068;
+            box-sizing: border-box;
         }
-        h2 { color: #00ffcc; text-shadow: 0 0 10px #00ffcc; margin-bottom: 20px; }
-        
-        .input-row { display: flex; justify-content: space-between; margin-bottom: 10px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; }
-        .input-box { width: 30%; }
-        label { display: block; font-size: 11px; color: #00d2ff; margin-bottom: 5px; }
-        input { width: 70%; padding: 8px; border-radius: 5px; border: 1px solid #1f4068; background: #1a1a2e; color: #fff; text-align: center; font-size: 16px; }
-
-        /* Nút lấy dữ liệu */
-        .btn-sync { 
-            background: #27ae60; color: white; border: none; padding: 8px 15px; 
-            border-radius: 5px; cursor: pointer; font-size: 12px; margin-bottom: 20px;
-            transition: 0.3s;
-        }
-        .btn-sync:hover { background: #2ecc71; }
-
-        #main-result-box { background: #fff; margin: 20px auto; width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 5px solid #00ffcc; }
-        #main-result { font-size: 60px; font-weight: bold; color: #1a1a2e; }
-
+        .input-row { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 20px; }
+        .input-box { width: 32%; }
+        input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #1f4068; background: #1a1a2e; color: #fff; text-align: center; box-sizing: border-box; }
+        #main-result-box { background: #fff; margin: 20px auto; width: 130px; height: 130px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 5px solid #00ffcc; box-shadow: 0 0 20px #00ffcc; }
+        #main-result { font-size: 65px; font-weight: bold; color: #1a1a2e; }
         .sub-results { display: flex; justify-content: space-around; margin: 20px 0; }
-        .sub-box { background: #1f4068; padding: 10px; border-radius: 10px; width: 80px; }
-        .sub-val { font-size: 24px; font-weight: bold; color: #f1c40f; }
-
-        .btn-main { 
-            background: linear-gradient(45deg, #00ffcc, #00d2ff); color: #1a1a2e; border: none; 
-            padding: 15px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%;
-        }
-        .status { margin-top: 15px; font-size: 12px; color: #bdc3c7; font-family: monospace; min-height: 20px; }
+        .sub-box { background: #1f4068; padding: 10px; border-radius: 10px; width: 80px; border: 1px solid #00d2ff; }
+        .sub-val { font-size: 22px; font-weight: bold; color: #f1c40f; }
+        button { background: linear-gradient(45deg, #00ffcc, #00d2ff); color: #1a1a2e; border: none; padding: 15px; border-radius: 12px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; }
     </style>
 </head>
 <body>
-
-<div class="container">
-    <h2>DỰ ĐOÁN LÔ ĐỀ</h2>
-    
-    <button class="btn-sync" onclick="layDuLieuTuWeb()">🔄 CẬP NHẬT KẾT QUẢ MỚI NHẤT</button>
-
-    <div class="input-row">
-        <div class="input-box"><label>GIẢI 8</label><input type="number" id="g8" placeholder="?"></div>
-        <div class="input-box"><label>G. NHẤT</label><input type="number" id="g1" placeholder="?"></div>
-        <div class="input-box"><label>ĐẶC BIỆT</label><input type="number" id="gdb" placeholder="?"></div>
-    </div>
-
-    <div id="main-result-box"><div id="main-result">??</div></div>
-
-    <div class="sub-results">
-        <div class="sub-box"><div class="sub-val" id="s1">--</div></div>
+    <div class="container">
+        <h2 style="color: #00ffcc; margin-top: 0;">DỰ ĐOÁN LÔ ĐỀ</h2>
+        <button onclick="layDuLieuTuWeb()" style="padding: 8px; font-size: 12px; margin-bottom: 15px; background: #27ae60; color: white;">🔄 CẬP NHẬT KẾT QUẢ</button>
+        <div class="input-row">
+            <div class="input-box"><label style="font-size: 10px;">GIẢI 8</label><input type="number" id="g8" placeholder="00"></div>
+            <div class="input-box"><label style="font-size: 10px;">G.NHẤT</label><input type="number" id="g1" placeholder="00"></div>
+            <div class="input-box"><label style="font-size: 10px;">ĐẶC BIỆT</label><input type="number" id="gdb" placeholder="00"></div>
+        </div>
+        <div id="main-result-box"><div id="main-result">??</div></div>
+        <div class="sub-results">
+            <div class="sub-box"><div class="sub-val" id="s1">--</div></div>
 <div class="sub-box"><div class="sub-val" id="s2">--</div></div>
-        <div class="sub-box"><div class="sub-val" id="s3">--</div></div>
+            <div class="sub-box"><div class="sub-val" id="s3">--</div></div>
+        </div>
+        <button id="btnQuay" onclick="runAI()">BẮT ĐẦU DỰ ĐOÁN</button>
+        <p id="statusText" style="font-size: 12px; color: #bdc3c7; margin-top: 15px;">Hệ thống sẵn sàng!</p>
     </div>
-    
-    <button class="btn-main" id="btnQuay" onclick="runAI()">BẮT ĐẦU DỰ ĐOÁN</button>
-    <div id="statusText" class="status">Hệ thống đang chờ dữ liệu...</div>
-</div>
 
-<script>
-    // Hàm này giả lập việc lấy dữ liệu từ một trang web khác
-    async function layDuLieuTuWeb() {
-        const status = document.getElementById('statusText');
-        status.innerHTML = "📡 Đang kết nối tới server xổ số...";
-        
-        // Giả lập thời gian chờ phản hồi từ web (2 giây)
-        setTimeout(() => {
-            // Đây là nơi bạn sẽ nhận dữ liệu từ web
-            const duLieuGia = {
-                g8: Math.floor(Math.random() * 100),
-                g1: Math.floor(Math.random() * 100),
-                gdb: Math.floor(Math.random() * 100)
-            };
-
-            // Tự động điền vào các ô input
-            document.getElementById('g8').value = duLieuGia.g8.toString().padStart(2, '0');
-            document.getElementById('g1').value = duLieuGia.g1.toString().padStart(2, '0');
-            document.getElementById('gdb').value = duLieuGia.gdb.toString().padStart(2, '0');
-
-            status.innerHTML = "✅ Đã cập nhật kết quả từ hệ thống!";
-        }, 2000);
-    }
-
-    function runAI() {
-        // ... (Giữ nguyên logic nhảy số như bản trước)
-        const mainRes = document.getElementById('main-result');
-        const s1 = document.getElementById('s1');
-        const s2 = document.getElementById('s2');
-        const s3 = document.getElementById('s3');
-        const btn = document.getElementById('btnQuay');
-
-        btn.disabled = true;
-        let count = 0;
-        const timer = setInterval(() => {
-            mainRes.innerHTML = Math.floor(Math.random()*100).toString().padStart(2,'0');
-            count++;
-            if (count > 30) {
-                clearInterval(timer);
-                let v8 = parseInt(document.getElementById('g8').value) || 0;
-                let final = (v8 + Math.floor(Math.random()*50)) % 100;
-                mainRes.innerHTML = final.toString().padStart(2,'0');
-                s1.innerHTML = (final + 1).toString().padStart(2,'0');
-                s2.innerHTML = (final - 1).toString().padStart(2,'0');
-                s3.innerHTML = (final + 10) % 100;
-                btn.disabled = false;
-            }
-        }, 50);
-    }
-</script>
-
+    <script>
+        function layDuLieuTuWeb() {
+            document.getElementById('g8').value = Math.floor(Math.random()*100).toString().padStart(2,'0');
+            document.getElementById('g1').value = Math.floor(Math.random()*100).toString().padStart(2,'0');
+            document.getElementById('gdb').value = Math.floor(Math.random()*100).toString().padStart(2,'0');
+            document.getElementById('statusText').innerHTML = "✅ Đã lấy số ngẫu nhiên!";
+        }
+        function runAI() {
+            const btn = document.getElementById('btnQuay');
+            btn.disabled = true;
+            let count = 0;
+            const timer = setInterval(() => {
+                document.getElementById('main-result').innerHTML = Math.floor(Math.random()*100).toString().padStart(2,'0');
+                count++;
+                if (count > 30) {
+                    clearInterval(timer);
+                    let final = Math.floor(Math.random()*100);
+                    document.getElementById('main-result').innerHTML = final.toString().padStart(2,'0');
+                    document.getElementById('s1').innerHTML = ((final + 1) % 100).toString().padStart(2,'0');
+                    document.getElementById('s2').innerHTML = ((final + 10) % 100).toString().padStart(2,'0');
+                    document.getElementById('s3').innerHTML = Math.abs(final - 5).toString().padStart(2,'0');
+                    btn.disabled = false;
+                }
+            }, 50);
+        }
+    </script>
 </body>
 </html>
