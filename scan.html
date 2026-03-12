@@ -2,190 +2,50 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Scanner - Quét Giấy Dò</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Scan - Nạp Số</title>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            background: #0f0c29; 
-            color: #fff; 
-            margin: 0; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh;
-        }
-        .container { 
-            width: 92%; 
-            max-width: 400px; 
-            background: #16213e; 
-            padding: 20px; 
-            border-radius: 25px; 
-            border: 1px solid #1f4068; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            box-sizing: border-box;
-        }
-        h2 { color: #00ffcc; margin-top: 0; font-size: 22px; }
-        
-        /* Khung tải ảnh */
-        .upload-area {
-            border: 2px dashed #00d2ff;
-            border-radius: 15px;
-            padding: 30px 10px;
-            margin: 20px 0;
-            position: relative;
-            background: rgba(0, 210, 255, 0.05);
-        }
-        .upload-area input {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0; left: 0;
-            opacity: 0;
-            cursor: pointer;
-        }
-        
-        #preview {
-            width: 100%;
-            max-height: 250px;
-            border-radius: 10px;
-            display: none;
-            margin-top: 10px;
-            border: 2px solid #00ffcc;
-        }
-
-        /* Thanh tiến trình */
-        .progress-container {
-            width: 100%;
-            height: 8px;
-            background: #0f3460;
-            border-radius: 10px;
-            margin: 15px 0;
-            display: none;
-            overflow: hidden;
-        }
-        #progress-bar {
-            width: 0%;
-            height: 100%;
-            background: linear-gradient(90deg, #00ffcc, #00d2ff);
-            transition: 0.3s;
-        }
-
-        /* Kết quả */
-        .result-card {
-            background: #1a1a2e;
-            padding: 15px;
-            border-radius: 15px;
-            margin-top: 20px;
-            display: none;
-            border-left: 5px solid #00ffcc;
-        }
-        .res-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #252545;
-        }
-        .res-item:last-child { border: none; }
-        .res-item b { color: #f1c40f; font-size: 20px; }
-
-        .btn-back {
-            display: block;
-            margin-top: 20px;
-            color: #00d2ff;
-            text-decoration: none;
-            font-size: 14px;
-        }
+        body { font-family: sans-serif; background: #1a1a2e; color: #fff; text-align: center; padding: 20px; }
+        .box { background: #16213e; padding: 20px; border-radius: 15px; max-width: 400px; margin: auto; }
+        button { background: #27ae60; color: white; padding: 15px; border: none; border-radius: 10px; width: 100%; cursor: pointer; font-weight: bold; margin-top: 10px;}
     </style>
 </head>
 <body>
-
-<div class="container">
-    <h2>MÁY QUÉT AI 📸</h2>
-<p style="font-size: 13px; color: #bdc3c7;">Chụp ảnh tờ giấy dò hoặc màn hình kết quả để lấy số tự động.</p>
-
-    <div class="upload-area" id="drop-zone">
-        <span id="upload-text">📸 Chạm để chụp hoặc chọn ảnh</span>
+    <div class="box">
+        <h2>ADMIN NẠP SỐ 📸</h2>
         <input type="file" id="file-input" accept="image/*">
-        <img id="preview">
+        <p id="status">Chọn ảnh giấy dò hôm nay</p>
+        
+        <div id="result" style="display:none">
+            <p>G8: <span id="r8"></span> | G1: <span id="r1"></span> | ĐB: <span id="rdb"></span></p>
+            <button onclick="shareLink()">🔗 GỬI LINK MỚI CHO BẠN BÈ</button>
+        </div>
     </div>
 
-    <div class="progress-container" id="p-container">
-        <div id="progress-bar"></div>
-    </div>
-    <p id="status" style="font-size: 13px; color: #00ffcc;"></p>
-
-    <div class="result-card" id="result-card">
-        <div class="res-item">Đặc Biệt: <b id="res-db">--</b></div>
-        <div class="res-item">Giải Nhất: <b id="res-g1">--</b></div>
-        <div class="res-item">Giải Tám: <b id="res-g8">--</b></div>
-        <button onclick="copyToMain()" style="margin-top:15px; width:100%; padding:12px; border-radius:10px; border:none; background:#27ae60; color:white; font-weight:bold;">SỬ DỤNG SỐ NÀY</button>
-    </div>
-
-    <a href="index.html" class="btn-back">⬅ Quay lại trang dự đoán</a>
-</div>
-
-<script>
-    const fileInput = document.getElementById('file-input');
-    const status = document.getElementById('status');
-    const pContainer = document.getElementById('p-container');
-    const progressBar = document.getElementById('progress-bar');
-    const uploadText = document.getElementById('upload-text');
-
-    fileInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        // Xem trước ảnh
-        const reader = new FileReader();
-        reader.onload = () => {
-            const img = document.getElementById('preview');
-            img.src = reader.result;
-            img.style.display = 'block';
-            uploadText.style.display = 'none';
-            processImage(file);
-        };
-        reader.readAsDataURL(file);
-    });
-
-    async function processImage(file) {
-        status.innerHTML = "🌀 Đang nhận diện chữ số...";
-        pContainer.style.display = 'block';
-        document.getElementById('result-card').style.display = 'none';
-
-        try {
-            const result = await Tesseract.recognize(file, 'eng', {
-                logger: m => {
-                    if (m.status === 'recognizing text') {
-                        progressBar.style.width = (m.progress * 100) + "%";
-                    }
-                }
-            });
-
-            const text = result.data.text;
-            // Tìm tất cả các dãy số có từ 2 chữ số trở lên
-            const numbers = text.match(/\d{2,}/g);
-
-            if (numbers && numbers.length >= 3) {
-                // Thuật toán bốc số dựa trên độ dài (Đặc biệt thường dài nhất)
-                let sorted = [...numbers].sort((a, b) => b.length - a.length);
-                
-                document.getElementById('res-db').innerText = sorted[0].slice(-2); // Dài nhất là ĐB
-document.getElementById('res-g1').innerText = sorted[1] ? sorted[1].slice(-2) : "--";
-                document.getElementById('res-g8').innerText = sorted[sorted.length - 1].slice(-2); // Ngắn thường là Giải 8
-                
-                document.getElementById('result-card').style.display = 'block';
-                status.innerHTML = "✅ Quét thành công!";
-            } else {
-                status.innerHTML = "❌ Không tìm thấy số. Hãy chụp rõ hơn!";
+    <script>
+        const fileInput = document.getElementById('file-input');
+        fileInput.addEventListener('change', async (e) => {
+            document.getElementById('status').innerHTML = "⏳ AI đang đọc...";
+            const result = await Tesseract.recognize(e.target.files[0], 'eng');
+            const nums = result.data.text.match(/\d+/g);
+            if(nums && nums.length >= 3) {
+                document.getElementById('r8').innerText = nums[0].slice(-2);
+                document.getElementById('r1').innerText = nums[1].slice(-2);
+                document.getElementById('rdb').innerText = nums[nums.length-1].slice(-2);
+                document.getElementById('result').style.display = "block";
+                document.getElementById('status').innerHTML = "✅ Quét xong!";
             }
-        } catch (error) {
-            status.innerHTML = "❌ Lỗi hệ thống quét.";
-        }
-    }
+        });
 
-    function copyToMain() {
-        alert("Đã lưu số! Bạn hãy quay lại trang chính và điền vào nhé.");
-        // Trong thực tế, bạn có thể dùng localStorage để chuyển dữ liệu giữa 2 trang
-        localStorage.setItem('
+        function shareLink() {
+            const g8 = document.getElementById('r8').innerText;
+            const g1 = document.getElementById('r1').innerText;
+            const db = document.getElementById('rdb').innerText;
+            const shareUrl = window.location.origin + window.location.pathname.replace('scan.html', 'index.html') + `?data=${g8}-${g1}-${db}`;
+            navigator.clipboard.writeText(shareUrl);
+            alert("Đã sao chép Link mới! Gửi link này để bạn bè chơi được tiếp nhé.");
+        }
+    </script>
+</body>
+</html>
