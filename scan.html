@@ -2,8 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Scan - Nạp Số</title>
+    <title>Admin - Nạp Số Hệ Thống</title>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
         body { font-family: sans-serif; background: #1a1a2e; color: #fff; text-align: center; padding: 20px; }
@@ -13,38 +12,41 @@
 </head>
 <body>
     <div class="box">
-        <h2>ADMIN NẠP SỐ 📸</h2>
+        <h2>HỆ THỐNG NẠP SỐ 🚀</h2>
         <input type="file" id="file-input" accept="image/*">
-        <p id="status">Chọn ảnh giấy dò hôm nay</p>
-        
+        <p id="status">Quét ảnh xong nhấn "Cập Nhật Toàn Hệ Thống"</p>
         <div id="result" style="display:none">
             <p>G8: <span id="r8"></span> | G1: <span id="r1"></span> | ĐB: <span id="rdb"></span></p>
-            <button onclick="shareLink()">🔗 GỬI LINK MỚI CHO BẠN BÈ</button>
+            <button onclick="updateSystem()">📡 CẬP NHẬT TOÀN HỆ THỐNG</button>
         </div>
     </div>
 
     <script>
+        let currentNums = {};
         const fileInput = document.getElementById('file-input');
         fileInput.addEventListener('change', async (e) => {
             document.getElementById('status').innerHTML = "⏳ AI đang đọc...";
             const result = await Tesseract.recognize(e.target.files[0], 'eng');
             const nums = result.data.text.match(/\d+/g);
             if(nums && nums.length >= 3) {
-                document.getElementById('r8').innerText = nums[0].slice(-2);
-                document.getElementById('r1').innerText = nums[1].slice(-2);
-                document.getElementById('rdb').innerText = nums[nums.length-1].slice(-2);
+                currentNums = {
+                    g8: nums[0].slice(-2),
+                    g1: nums[1].slice(-2),
+                    gdb: nums[nums.length-1].slice(-2),
+                    date: new Date().toLocaleDateString('sv-SE') // Định dạng YYYY-MM-DD
+                };
+                document.getElementById('r8').innerText = currentNums.g8;
+                document.getElementById('r1').innerText = currentNums.g1;
+                document.getElementById('rdb').innerText = currentNums.gdb;
                 document.getElementById('result').style.display = "block";
-                document.getElementById('status').innerHTML = "✅ Quét xong!";
+                document.getElementById('status').innerHTML = "✅ Quét xong! Hãy cập nhật.";
             }
         });
 
-        function shareLink() {
-            const g8 = document.getElementById('r8').innerText;
-            const g1 = document.getElementById('r1').innerText;
-            const db = document.getElementById('rdb').innerText;
-            const shareUrl = window.location.origin + window.location.pathname.replace('scan.html', 'index.html') + `?data=${g8}-${g1}-${db}`;
-            navigator.clipboard.writeText(shareUrl);
-            alert("Đã sao chép Link mới! Gửi link này để bạn bè chơi được tiếp nhé.");
+        function updateSystem() {
+            // Lưu vào LocalStorage để trang Index cùng trình duyệt có thể đọc (Nếu bạn dùng chung máy)
+            localStorage.setItem('lottery_data', JSON.stringify(currentNums));
+            alert("✅ Đã cập nhật số mới cho ngày hôm nay!");
         }
     </script>
 </body>
