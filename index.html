@@ -7,13 +7,16 @@
     <style>
         body { font-family: 'Segoe UI', sans-serif; text-align: center; background: #0f0c29; color: #fff; margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; overflow: hidden; }
         .container { background: #16213e; width: 92%; max-width: 380px; padding: 20px; border-radius: 20px; box-shadow: 0 0 30px rgba(0, 255, 127, 0.2); border: 1px solid #1f4068; }
-        .station-info { background: #1a1a2e; padding: 10px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #f1c40f; font-size: 13px; color: #f1c40f; font-weight: bold; }
         
+        .header-info { background: #1a1a2e; padding: 12px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #f1c40f; text-align: left; }
+        .date-text { font-size: 14px; color: #f1c40f; font-weight: bold; display: block; }
+        .station-text { font-size: 13px; color: #00d2ff; font-weight: 500; margin-top: 3px; }
+
         #btnGet { background: #27ae60; color: white; border: none; padding: 12px; border-radius: 10px; font-size: 14px; cursor: pointer; width: 100%; margin-bottom: 15px; font-weight: bold; box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3); }
         
         .input-row { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 15px; }
         .input-box { width: 32%; }
-        label { font-size: 10px; color: #00d2ff; display: block; margin-bottom: 5px; font-weight: bold; }
+        label { font-size: 10px; color: #00d2ff; display: block; margin-bottom: 5px; font-weight: bold; text-transform: uppercase; }
         input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #1f4068; background: #0f3460; color: #fff; text-align: center; box-sizing: border-box; font-weight: bold; font-size: 22px; }
         
         #main-result-box { background: #fff; margin: 15px auto; width: 115px; height: 115px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 5px solid #00ffcc; box-shadow: 0 0 20px #00ffcc; }
@@ -30,7 +33,11 @@
 <body>
     <div class="container">
         <h2 style="color: #00ffcc; margin: 0 0 10px 0; font-size: 24px;">DỰ ĐOÁN LÔ ĐỀ MIỀN NAM</h2>
-        <div class="station-info" id="station-info">📅 Đang tải lịch...</div>
+        
+        <div class="header-info">
+            <span id="currentDate" class="date-text">📅 Đang tải ngày...</span>
+            <span id="currentStation" class="station-text">📍 Đang xem lịch mở thưởng...</span>
+        </div>
 
         <button id="btnGet" onclick="syncData()">📡 LẤY KẾT QUẢ MỚI NHẤT</button>
 
@@ -49,22 +56,38 @@
         </div>
         
         <button id="btnQuay" onclick="runAI()">BẮT ĐẦU DỰ ĐOÁN</button>
-        <p id="statusText">Hãy bấm nút kết nối phía trên!</p>
+        <p id="statusText">Bấm nút phía trên để kết nối dữ liệu!</p>
     </div>
 
     <script>
-        // THÔNG TIN THÙNG THƯ (Thay bằng của bạn)
-        const GIST_URL = 'https://gist.github.com/1606teothao103/1d2985cad9f6a517f9025fef7ab36aa1';
+        // --- CẤU HÌNH ĐỊA CHỈ GIST CỦA BẠN ---
+        const GIST_URL = 'https://gist.githubusercontent.com/1606teothao103/1d2985cad9f6a517f9025fef7ab36aa1/raw/lottery.json';
 
-        const days = ["Chủ Nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
-        document.getElementById('station-info').innerHTML = "📅 " + days[new Date().getDay()] + " (Miền Nam)";
+        // Tự động hiển thị Ngày và Đài Miền Nam
+        function updateCalendar() {
+            const now = new Date();
+            const days = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
+            const stations = [
+                "Tiền Giang",
+                "TP.HCM",
+                "Vũng Tàu",
+                "Đồng Nai",
+                "Tây Ninh",
+                "Bình Dương",
+                "TP.HCM"
+            ];
+            
+            const dateStr = now.toLocaleDateString('vi-VN');
+            document.getElementById('currentDate').innerText = `📅 ${days[now.getDay()]}, ${dateStr}`;
+            document.getElementById('currentStation').innerText = `📍 Đài: ${stations[now.getDay()]}`;
+        }
+        updateCalendar();
 
         async function syncData() {
             const status = document.getElementById('statusText');
-            status.innerHTML = "⏳ Đang kiểm tra dữ liệu...";
+            status.innerHTML = "⏳ Đang đồng bộ kết quả...";
             
             try {
-                // Thêm ?t=... để tránh bị trình duyệt lưu lại kết quả cũ (Cache)
                 const response = await fetch(GIST_URL + '?t=' + Date.now());
                 const data = await response.json();
                 
@@ -72,24 +95,20 @@
                 const todayStr = now.toLocaleDateString('sv-SE'); // YYYY-MM-DD
                 const currentTime = now.getHours() * 100 + now.getMinutes();
 
-                // NẾU SAU 15h30 (1530)
-                if (currentTime >= 1530) {
-                    // Nếu dữ liệu trên mạng chưa phải của ngày hôm nay
-                    if (data.date !== todayStr) {
-                        status.innerHTML = "❌ Không có số thì soi bằng niềm tin à?";
-                        document.getElementById('g8').value = "";
-                        return;
-                    }
+                // Kiểm tra nếu sau 15h30 mà chưa có số mới của ngày hôm nay
+                if (currentTime >= 1530 && data.date !== todayStr) {
+                    status.innerHTML = "❌ Không có số thì soi bằng niềm tin à?";
+                    document.getElementById('g8').value = "";
+                    return;
                 }
 
-                // Nếu mọi thứ ổn, điền số vào ô
                 document.getElementById('g8').value = data.g8;
                 document.getElementById('g1').value = data.g1;
                 document.getElementById('gdb').value = data.gdb;
-                status.innerHTML = "✅ Đã nhận kết quả ngày " + data.date;
+                status.innerHTML = "✅ Đã nhận dữ liệu ngày " + (data.date || "hôm nay");
                 
             } catch (err) {
-                status.innerHTML = "❌ Lỗi kết nối máy chủ!";
+                status.innerHTML = "❌ Lỗi: Chưa kết nối được thùng thư!";
             }
         }
 
@@ -109,16 +128,16 @@
                 if (count > 25) {
                     clearInterval(timer);
                     let seed = parseInt(g8);
-                    let final = (seed + 21) % 100; // Thuật toán của bạn
+                    let final = (seed + 19) % 100; // Công thức dự đoán
                     document.getElementById('main-result').innerHTML = final.toString().padStart(2,'0');
                     document.getElementById('s1').innerHTML = ((final + 1) % 100).toString().padStart(2,'0');
-                    document.getElementById('s2').innerHTML = ((final + 8) % 100).toString().padStart(2,'0');
-                    document.getElementById('s3').innerHTML = Math.abs(final - 3).toString().padStart(2,'0');
+                    document.getElementById('s2').innerHTML = ((final + 10) % 100).toString().padStart(2,'0');
+                    document.getElementById('s3').innerHTML = Math.abs(final - 5).toString().padStart(2,'0');
                     btn.disabled = false;
+                    document.getElementById('statusText').innerHTML = "✨ Đã soi xong! Chúc may mắn!";
                 }
             }, 50);
         }
     </script>
 </body>
 </html>
-
