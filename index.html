@@ -128,11 +128,11 @@
                 if (count > 25) {
                     clearInterval(timer);
                     let seed = parseInt(g8);
-                    let final = (seed + 19) % 100; // Công thức dự đoán
+                    let final = (seed + 85) % 100; // Công thức dự đoán
                     document.getElementById('main-result').innerHTML = final.toString().padStart(2,'0');
-                    document.getElementById('s1').innerHTML = ((final + 1) % 100).toString().padStart(2,'0');
-                    document.getElementById('s2').innerHTML = ((final + 10) % 100).toString().padStart(2,'0');
-                    document.getElementById('s3').innerHTML = Math.abs(final - 5).toString().padStart(2,'0');
+                    document.getElementById('s1').innerHTML = ((final + 86) % 100).toString().padStart(2,'0');
+                    document.getElementById('s2').innerHTML = ((final + 83) % 100).toString().padStart(2,'0');
+                    document.getElementById('s3').innerHTML = Math.abs(final - 4).toString().padStart(2,'0');
                     btn.disabled = false;
                     document.getElementById('statusText').innerHTML = "✨ Đã soi xong! Chúc may mắn!";
                 }
@@ -141,3 +141,4 @@
     </script>
 </body>
 </html>
+
