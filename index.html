@@ -83,37 +83,21 @@
         }
         updateCalendar();
 
-        async function syncData() {
+        async function getLuckyNumbers() {
     const displayArea = document.getElementById('display-area');
-    const now = new Date();
-    const currentHour = now.getHours();
-    const currentMinute = now.getMinutes();
-
-    // 1. Kiểm tra khung giờ "Nhạy cảm" (Từ 15h30 đến lúc có dữ liệu mới)
-    // Nếu bạn muốn khóa hiển thị trong khoảng này:
-    const isWaitingPeriod = (currentHour === 15 && currentMinute >= 30) || (currentHour === 16);
-
-    displayArea.innerHTML = "<div class='scanning'>🌀 ĐANG KẾT NỐI HỆ THỐNG...</div>";
+    displayArea.innerHTML = "<div class='scanning'>🌀 ĐANG TRUY XUẤT DỮ LIỆU AI...</div>";
 
     try {
-        const response = await fetch(GIST_URL + "?t=" + new Date().getTime()); // Thêm t để xóa cache
-        const data = await response.json();
-
-        // 2. Kiểm tra xem dữ liệu trong Gist có phải của ngày hôm nay không
-        const todayStr = new Date().toLocaleDateString('sv-SE'); // Định dạng YYYY-MM-DD
+        // Thêm mã ngẫu nhiên vào cuối link để ép trình duyệt tải mới 100%
+        const finalUrl = GIST_URL + "?nocache=" + Math.random();
+        const response = await fetch(finalUrl);
         
-        if (data.date !== todayStr && isWaitingPeriod) {
-            displayArea.innerHTML = `
-                <div style="padding: 20px; border: 2px solid #f1c40f; border-radius: 20px; background: rgba(241,196,15,0.05);">
-                    <h2 style="color: #f1c40f;">⏳ CHỜ DỮ LIỆU</h2>
-                    <p>Kết quả hôm nay chưa được cập nhật.<br>Vui lòng quay lại sau ít phút!</p>
-                    <p style="font-size: 11px; color: #8b949e;">Lần cuối cập nhật: ${data.date}</p>
-                </div>
-            `;
-            return; // Dừng lại, không hiện số cũ
-        }
+        if (!response.ok) throw new Error("Không thể tải file");
+        
+        const data = await response.json();
+        const todayStr = new Date().toLocaleDateString('sv-SE'); // Định dạng YYYY-MM-DD
 
-        // --- NẾU ĐÃ CÓ SỐ MỚI HOẶC NGOÀI GIỜ KHÓA -> CHẠY THUẬT TOÁN ---
+        // --- THUẬT TOÁN CỦA BẠN ---
         const g8 = parseInt(data.g8) || 0;
         const g1 = parseInt(data.g1) || 0;
         const gdb = parseInt(data.gdb) || 0;
@@ -129,24 +113,29 @@
 
         const format = (n) => Math.abs(n).toString().padStart(2, '0').slice(-2);
 
-        // Hiệu ứng chạy số kịch tính
+        // Hiệu ứng chạy số nhanh
         let count = 0;
         const interval = setInterval(() => {
             displayArea.innerHTML = `<h1 style="font-size: 60px; color: #00ffcc;">${Math.floor(Math.random() * 99)}</h1>`;
             count++;
-            if (count > 15) {
+            
+            if (count > 10) {
                 clearInterval(interval);
                 
+                // Nếu dữ liệu vẫn là ngày cũ
+                let dateNote = `<p style="color: #8b949e; font-size: 11px;">Cập nhật: ${data.date}</p>`;
+                if (data.date !== todayStr) {
+                    dateNote = `<p style="color: #f1c40f; font-size: 11px;">⚠️ Đang hiển thị kết quả cũ (${data.date})</p>`;
+                }
+
                 displayArea.innerHTML = `
                     <div style="padding: 20px; border: 2px solid #00ffcc; border-radius: 20px; background: rgba(0,255,204,0.05);">
-                        <p style="color: #8b949e; margin-bottom: 5px;">KẾT QUẢ SOI CẦU AI</p>
-                        <div style="font-size: 11px; color: #58a6ff; margin-bottom: 15px;">
-                            Thuật toán dựa trên dữ liệu ngày: ${data.date}
-                        </div>
+                        <p style="color: #00ffcc; margin-bottom: 5px; font-weight: bold;">KẾT QUẢ DỰ ĐOÁN AI</p>
+                        ${dateNote}
                         
-                        <div style="margin-bottom: 20px;">
-                            <label style="display:block; font-size: 14px; color: #00ffcc;">SỐ CHÍNH TÂM</label>
-                            <span style="font-size: 70px; font-weight: bold; color: #fff; text-shadow: 0 0 20px #00ffcc;">
+                        <div style="margin: 20px 0;">
+                            <label style="display:block; font-size: 12px;">SỐ CHÍNH</label>
+                            <span style="font-size: 75px; font-weight: bold; color: #fff; text-shadow: 0 0 15px #00ffcc;">
                                 ${format(kq1)}
                             </span>
                         </div>
@@ -159,10 +148,11 @@
                     </div>
                 `;
             }
-        }, 100);
+        }, 80);
 
     } catch (error) {
-        displayArea.innerHTML = "❌ Lỗi kết nối dữ liệu!";
+        console.error(error);
+        displayArea.innerHTML = "<div style='color:#f85149;'>❌ Lỗi: Không thể lấy dữ liệu. Kiểm tra lại đường dẫn Gist của bạn!</div>";
     }
 }
     </script>
