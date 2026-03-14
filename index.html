@@ -83,61 +83,88 @@
         }
         updateCalendar();
 
-        async function syncData() {
-            const status = document.getElementById('statusText');
-            status.innerHTML = "⏳ Đang đồng bộ kết quả...";
-            
-            try {
-                const response = await fetch(GIST_URL + '?t=' + Date.now());
-                const data = await response.json();
-                
-                const now = new Date();
-                const todayStr = now.toLocaleDateString('sv-SE'); // YYYY-MM-DD
-                const currentTime = now.getHours() * 100 + now.getMinutes();
+        async function getLuckyNumbers() {
+    const displayArea = document.getElementById('display-area');
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
 
-                // Kiểm tra nếu sau 15h30 mà chưa có số mới của ngày hôm nay
-                if (currentTime >= 1530 && data.date !== todayStr) {
-                    status.innerHTML = "❌ Không có số thì soi bằng niềm tin à?";
-                    document.getElementById('g8').value = "";
-                    return;
-                }
+    // 1. Kiểm tra khung giờ "Nhạy cảm" (Từ 15h30 đến lúc có dữ liệu mới)
+    // Nếu bạn muốn khóa hiển thị trong khoảng này:
+    const isWaitingPeriod = (currentHour === 15 && currentMinute >= 30) || (currentHour === 16);
 
-                document.getElementById('g8').value = data.g8;
-                document.getElementById('g1').value = data.g1;
-                document.getElementById('gdb').value = data.gdb;
-                status.innerHTML = "✅ Đã nhận dữ liệu ngày " + (data.date || "hôm nay");
-                
-            } catch (err) {
-                status.innerHTML = "❌ Lỗi: Chưa kết nối được thùng thư!";
-            }
+    displayArea.innerHTML = "<div class='scanning'>🌀 ĐANG KẾT NỐI HỆ THỐNG...</div>";
+
+    try {
+        const response = await fetch(GIST_URL + "?t=" + new Date().getTime()); // Thêm t để xóa cache
+        const data = await response.json();
+
+        // 2. Kiểm tra xem dữ liệu trong Gist có phải của ngày hôm nay không
+        const todayStr = new Date().toLocaleDateString('sv-SE'); // Định dạng YYYY-MM-DD
+        
+        if (data.date !== todayStr && isWaitingPeriod) {
+            displayArea.innerHTML = `
+                <div style="padding: 20px; border: 2px solid #f1c40f; border-radius: 20px; background: rgba(241,196,15,0.05);">
+                    <h2 style="color: #f1c40f;">⏳ CHỜ DỮ LIỆU</h2>
+                    <p>Kết quả hôm nay chưa được cập nhật.<br>Vui lòng quay lại sau ít phút!</p>
+                    <p style="font-size: 11px; color: #8b949e;">Lần cuối cập nhật: ${data.date}</p>
+                </div>
+            `;
+            return; // Dừng lại, không hiện số cũ
         }
 
-        function runAI() {
-            const g8 = document.getElementById('g8').value;
-            if(!g8) {
-                document.getElementById('statusText').innerHTML = "❌ Không có số thì soi bằng niềm tin à?";
-                return;
+        // --- NẾU ĐÃ CÓ SỐ MỚI HOẶC NGOÀI GIỜ KHÓA -> CHẠY THUẬT TOÁN ---
+        const g8 = parseInt(data.g8) || 0;
+        const g1 = parseInt(data.g1) || 0;
+        const gdb = parseInt(data.gdb) || 0;
+
+        const S = g8 + g1 + gdb;
+        const R = S % 3;
+        const Q = Math.floor(S / 3);
+
+        const kq1 = R;
+        const kq2 = R + Q;
+        const kq3 = R - Q;
+        const kq4 = S - R + Q;
+
+        const format = (n) => Math.abs(n).toString().padStart(2, '0').slice(-2);
+
+        // Hiệu ứng chạy số kịch tính
+        let count = 0;
+        const interval = setInterval(() => {
+            displayArea.innerHTML = `<h1 style="font-size: 60px; color: #00ffcc;">${Math.floor(Math.random() * 99)}</h1>`;
+            count++;
+            if (count > 15) {
+                clearInterval(interval);
+                
+                displayArea.innerHTML = `
+                    <div style="padding: 20px; border: 2px solid #00ffcc; border-radius: 20px; background: rgba(0,255,204,0.05);">
+                        <p style="color: #8b949e; margin-bottom: 5px;">KẾT QUẢ SOI CẦU AI</p>
+                        <div style="font-size: 11px; color: #58a6ff; margin-bottom: 15px;">
+                            Thuật toán dựa trên dữ liệu ngày: ${data.date}
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display:block; font-size: 14px; color: #00ffcc;">SỐ CHÍNH TÂM</label>
+                            <span style="font-size: 70px; font-weight: bold; color: #fff; text-shadow: 0 0 20px #00ffcc;">
+                                ${format(kq1)}
+                            </span>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; border-top: 1px dashed #30363d; padding-top: 15px;">
+                            <div><label style="display:block; font-size: 10px;">CẦU THUẬN</label><b style="font-size: 22px; color: #f1c40f;">${format(kq2)}</b></div>
+                            <div><label style="display:block; font-size: 10px;">CẦU NGHỊCH</label><b style="font-size: 22px; color: #f1c40f;">${format(kq3)}</b></div>
+                            <div><label style="display:block; font-size: 10px;">CẦU BIẾN</label><b style="font-size: 22px; color: #f1c40f;">${format(kq4)}</b></div>
+                        </div>
+                    </div>
+                `;
             }
-            
-            const btn = document.getElementById('btnQuay');
-            btn.disabled = true;
-            let count = 0;
-            const timer = setInterval(() => {
-                document.getElementById('main-result').innerHTML = Math.floor(Math.random()*100).toString().padStart(2,'0');
-                count++;
-                if (count > 25) {
-                    clearInterval(timer);
-                    let seed = parseInt(g8);
-                    let final = (seed + 85) % 100; // Công thức dự đoán
-                    document.getElementById('main-result').innerHTML = final.toString().padStart(2,'0');
-                    document.getElementById('s1').innerHTML = ((final + 86) % 100).toString().padStart(2,'0');
-                    document.getElementById('s2').innerHTML = ((final + 83) % 100).toString().padStart(2,'0');
-                    document.getElementById('s3').innerHTML = Math.abs(final - 4).toString().padStart(2,'0');
-                    btn.disabled = false;
-                    document.getElementById('statusText').innerHTML = "✨ Đã soi xong! Chúc may mắn!";
-                }
-            }, 50);
-        }
+        }, 100);
+
+    } catch (error) {
+        displayArea.innerHTML = "❌ Lỗi kết nối dữ liệu!";
+    }
+}
     </script>
 </body>
 </html>
