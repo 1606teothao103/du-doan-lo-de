@@ -2,160 +2,154 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SỐ ĐỎ</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; text-align: center; background: #0f0c29; color: #fff; margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; overflow: hidden; }
-        .container { background: #16213e; width: 92%; max-width: 380px; padding: 20px; border-radius: 20px; box-shadow: 0 0 30px rgba(0, 255, 127, 0.2); border: 1px solid #1f4068; }
+        :root { --neon: #00ffcc; --gold: #f1c40f; --bg: #0d1117; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; text-align: center; padding: 20px; overflow-x: hidden; }
         
-        .header-info { background: #1a1a2e; padding: 12px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #f1c40f; text-align: left; }
-        .date-text { font-size: 14px; color: #f1c40f; font-weight: bold; display: block; }
-        .station-text { font-size: 13px; color: #00d2ff; font-weight: 500; margin-top: 3px; }
+        /* Container phong cách hiện đại */
+        .main-card { 
+            max-width: 400px; margin: auto; background: #161b22; padding: 30px 20px; 
+            border-radius: 25px; border: 1px solid #30363d; 
+            box-shadow: 0 0 20px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,255,204,0.1);
+        }
 
-        #btnGet { background: #27ae60; color: white; border: none; padding: 12px; border-radius: 10px; font-size: 14px; cursor: pointer; width: 100%; margin-bottom: 15px; font-weight: bold; box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3); }
+        /* Hiệu ứng quét Radar */
+        .radar-box {
+            position: relative; width: 100%; height: 220px; margin-bottom: 20px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 15px; background: rgba(0,0,0,0.2); overflow: hidden;
+        }
+        .radar-line {
+            position: absolute; width: 100%; height: 2px; background: var(--neon);
+            box-shadow: 0 0 15px var(--neon); top: 0; animation: scan 2s linear infinite;
+        }
+        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
+
+        /* Chữ số to, đẹp */
+        .big-number { font-size: 85px; font-weight: 900; color: white; text-shadow: 0 0 25px var(--neon); margin: 0; }
+        .sub-number { font-size: 24px; color: var(--gold); font-weight: bold; }
         
-        .input-row { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 15px; }
-        .input-box { width: 32%; }
-        label { font-size: 10px; color: #00d2ff; display: block; margin-bottom: 5px; font-weight: bold; text-transform: uppercase; }
-        input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #1f4068; background: #0f3460; color: #fff; text-align: center; box-sizing: border-box; font-weight: bold; font-size: 22px; }
-        
-        #main-result-box { background: #fff; margin: 15px auto; width: 115px; height: 115px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 5px solid #00ffcc; box-shadow: 0 0 20px #00ffcc; }
-        #main-result { font-size: 55px; font-weight: bold; color: #1a1a2e; }
-        
-        .sub-results { display: flex; justify-content: space-around; margin: 15px 0; }
-        .sub-box { background: #1f4068; padding: 8px; border-radius: 10px; width: 75px; border: 1px solid #00d2ff; }
-        .sub-val { font-size: 20px; font-weight: bold; color: #f1c40f; }
-        
-        #btnQuay { background: linear-gradient(45deg, #00ffcc, #00d2ff); color: #1a1a2e; border: none; padding: 15px; border-radius: 12px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; }
-        #statusText { font-size: 13px; color: #ffcc00; margin-top: 15px; min-height: 35px; line-height: 1.4; display: flex; align-items: center; justify-content: center; font-weight: 500; }
+        .label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #8b949e; margin-bottom: 5px; }
+
+        /* Nút bấm Premium */
+        .btn-predict {
+            background: linear-gradient(135deg, #238636, #2ea44f);
+            color: white; border: none; padding: 18px; border-radius: 15px;
+            width: 100%; font-size: 18px; font-weight: bold; cursor: pointer;
+            box-shadow: 0 5px 15px rgba(35,134,54,0.3); transition: 0.2s;
+        }
+        .btn-predict:active { transform: scale(0.95); }
+
+        .waiting-msg { color: var(--gold); font-style: italic; font-size: 14px; animation: blink 1.5s infinite; }
+        @keyframes blink { 50% { opacity: 0.3; } }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2 style="color: #00ffcc; margin: 0 0 10px 0; font-size: 24px;">DỰ ĐOÁN LÔ ĐỀ MIỀN NAM</h2>
-        
-        <div class="header-info">
-            <span id="currentDate" class="date-text">📅 Đang tải ngày...</span>
-            <span id="currentStation" class="station-text">📍 Đang xem lịch mở thưởng...</span>
-        </div>
 
-        <button id="btnGet" onclick="syncData()">📡 LẤY KẾT QUẢ MỚI NHẤT</button>
-
-        <div class="input-row">
-            <div class="input-box"><label>GIẢI 8</label><input type="text" id="g8" readonly placeholder="--"></div>
-            <div class="input-box"><label>G.NHẤT</label><input type="text" id="g1" readonly placeholder="--"></div>
-            <div class="input-box"><label>ĐẶC BIỆT</label><input type="text" id="gdb" readonly placeholder="--"></div>
-        </div>
-
-        <div id="main-result-box"><div id="main-result">??</div></div>
-        
-        <div class="sub-results">
-            <div class="sub-box"><div class="sub-val" id="s1">--</div></div>
-            <div class="sub-box"><div class="sub-val" id="s2">--</div></div>
-            <div class="sub-box"><div class="sub-val" id="s3">--</div></div>
-        </div>
-        
-        <button id="btnQuay" onclick="runAI()">BẮT ĐẦU DỰ ĐOÁN</button>
-        <p id="statusText">Bấm nút phía trên để kết nối dữ liệu!</p>
+<div class="main-card">
+    <div style="margin-bottom: 20px;">
+        <h2 style="margin: 0; color: var(--neon); letter-spacing: 1px;">DỰ ĐOÁN LÔ ĐỀ MIỀN NAM</h2>
+        <small id="current-date" style="color: #8b949e;"></small>
     </div>
 
-    <script>
-        // --- CẤU HÌNH ĐỊA CHỈ GIST CỦA BẠN ---
-        const GIST_URL = 'https://gist.githubusercontent.com/1606teothao103/1d2985cad9f6a517f9025fef7ab36aa1/raw/lottery.json';
+    <div class="radar-box" id="screen">
+        <p style="color: #58a6ff; padding: 20px;">Sẵn sàng phân tích dữ liệu...</p>
+    </div>
 
-        // Tự động hiển thị Ngày và Đài Miền Nam
-        function updateCalendar() {
-            const now = new Date();
-            const days = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
-            const stations = [
-                "Tiền Giang",
-                "TP.HCM",
-                "Vũng Tàu",
-                "Đồng Nai",
-                "Tây Ninh",
-                "Bình Dương",
-                "TP.HCM"
-            ];
-            
-            const dateStr = now.toLocaleDateString('vi-VN');
-            document.getElementById('currentDate').innerText = `📅 ${days[now.getDay()]}, ${dateStr}`;
-            document.getElementById('currentStation').innerText = `📍 Đài: ${stations[now.getDay()]}`;
-        }
-        updateCalendar();
+    <button class="btn-predict" onclick="processAI()">PHÂN TÍCH KẾT QUẢ</button>
+</div>
 
-        async function getLuckyNumbers() {
-    const displayArea = document.getElementById('display-area');
-    displayArea.innerHTML = "<div class='scanning'>🌀 ĐANG TRUY XUẤT DỮ LIỆU AI...</div>";
+<script>
+    // --- ĐIỀN LINK CỦA BẠN VÀO ĐÂY ---
+    const GIST_URL = 'https://gist.githubusercontent.com/1606teothao103/1d2985cad9f6a517f9025fef7ab36aa1/raw/lottery.json';
 
-    try {
-        // Thêm mã ngẫu nhiên vào cuối link để ép trình duyệt tải mới 100%
-        const finalUrl = GIST_URL + "?nocache=" + Math.random();
-        const response = await fetch(finalUrl);
-        
-        if (!response.ok) throw new Error("Không thể tải file");
-        
-        const data = await response.json();
-        const todayStr = new Date().toLocaleDateString('sv-SE'); // Định dạng YYYY-MM-DD
-
-        // --- THUẬT TOÁN CỦA BẠN ---
-        const g8 = parseInt(data.g8) || 0;
-        const g1 = parseInt(data.g1) || 0;
-        const gdb = parseInt(data.gdb) || 0;
-
-        const S = g8 + g1 + gdb;
-        const R = S % 3;
-        const Q = Math.floor(S / 3);
-
-        const kq1 = R;
-        const kq2 = R + Q;
-        const kq3 = R - Q;
-        const kq4 = S - R + Q;
-
-        const format = (n) => Math.abs(n).toString().padStart(2, '0').slice(-2);
-
-        // Hiệu ứng chạy số nhanh
-        let count = 0;
-        const interval = setInterval(() => {
-            displayArea.innerHTML = `<h1 style="font-size: 60px; color: #00ffcc;">${Math.floor(Math.random() * 99)}</h1>`;
-            count++;
-            
-            if (count > 10) {
-                clearInterval(interval);
-                
-                // Nếu dữ liệu vẫn là ngày cũ
-                let dateNote = `<p style="color: #8b949e; font-size: 11px;">Cập nhật: ${data.date}</p>`;
-                if (data.date !== todayStr) {
-                    dateNote = `<p style="color: #f1c40f; font-size: 11px;">⚠️ Đang hiển thị kết quả cũ (${data.date})</p>`;
-                }
-
-                displayArea.innerHTML = `
-                    <div style="padding: 20px; border: 2px solid #00ffcc; border-radius: 20px; background: rgba(0,255,204,0.05);">
-                        <p style="color: #00ffcc; margin-bottom: 5px; font-weight: bold;">KẾT QUẢ DỰ ĐOÁN AI</p>
-                        ${dateNote}
-                        
-                        <div style="margin: 20px 0;">
-                            <label style="display:block; font-size: 12px;">SỐ CHÍNH</label>
-                            <span style="font-size: 75px; font-weight: bold; color: #fff; text-shadow: 0 0 15px #00ffcc;">
-                                ${format(kq1)}
-                            </span>
-                        </div>
-
-                        <div style="display: flex; justify-content: space-between; border-top: 1px dashed #30363d; padding-top: 15px;">
-                            <div><label style="display:block; font-size: 10px;">CẦU THUẬN</label><b style="font-size: 22px; color: #f1c40f;">${format(kq2)}</b></div>
-                            <div><label style="display:block; font-size: 10px;">CẦU NGHỊCH</label><b style="font-size: 22px; color: #f1c40f;">${format(kq3)}</b></div>
-                            <div><label style="display:block; font-size: 10px;">CẦU BIẾN</label><b style="font-size: 22px; color: #f1c40f;">${format(kq4)}</b></div>
-                        </div>
-                    </div>
-                `;
-            }
-        }, 80);
-
-    } catch (error) {
-        console.error(error);
-        displayArea.innerHTML = "<div style='color:#f85149;'>❌ Lỗi: Không thể lấy dữ liệu. Kiểm tra lại đường dẫn Gist của bạn!</div>";
+    function updateDate() {
+        const d = new Date();
+        document.getElementById('current-date').innerText = d.toLocaleDateString('vi-VN');
     }
-}
-    </script>
+    updateDate();
+
+    async function processAI() {
+        const screen = document.getElementById('screen');
+        const now = new Date();
+        const currentTime = now.getHours() * 100 + now.getMinutes(); // VD: 15:30 -> 1530
+
+        // Hiệu ứng bắt đầu quét
+        screen.innerHTML = '<div class="radar-line"></div><p class="waiting-msg">ĐANG KẾT NỐI VỆ TINH...</p>';
+        
+        // Rung điện thoại nhẹ (nếu thiết bị hỗ trợ)
+        if (navigator.vibrate) navigator.vibrate(50);
+
+        try {
+            const response = await fetch(GIST_URL + "?t=" + Math.random());
+            const data = await response.json();
+            const todayStr = new Date().toLocaleDateString('sv-SE');
+
+            // --- KIỂM TRA KHÓA KẾT NỐI (Từ 15h30 đến khi có số mới) ---
+            // Nếu giờ > 15:30 VÀ dữ liệu trong máy vẫn là ngày cũ -> CHẶN
+            if (currentTime >= 1530 && data.date !== todayStr) {
+                setTimeout(() => {
+                    screen.innerHTML = `
+                        <div style="padding: 20px;">
+                            <div style="font-size: 40px;">⏳</div>
+                            <p class="waiting-msg">HỆ THỐNG ĐANG TẠM NGẮT</p>
+                            <small style="color: #8b949e;">Đang chờ dữ liệu mới từ nhà đài. Quay lại sau khi Admin cập nhật!</small>
+                        </div>
+                    `;
+                }, 1500);
+                return;
+            }
+
+            // --- THUẬT TOÁN CỦA BẠN ---
+            const g8 = parseInt(data.g8) || 0;
+            const g1 = parseInt(data.g1) || 0;
+            const gdb = parseInt(data.gdb) || 0;
+
+            const S = g8 + g1 + gdb;
+            const R = S % 3;
+            const Q = Math.floor(S / 3);
+
+            const results = [
+                R,              // Chính
+                R + Q,          // Thuận
+                R - Q,          // Nghịch
+                S - R + Q       // Biến
+            ];
+
+            const format = (n) => Math.abs(n).toString().padStart(2, '0').slice(-2);
+
+            // Chạy số ảo cho hấp dẫn
+            let timer = 0;
+            const interval = setInterval(() => {
+                screen.innerHTML = `<div class="radar-line"></div><h1 class="big-number" style="opacity: 0.5;">${Math.floor(Math.random()*99)}</h1>`;
+                timer++;
+                
+                if (timer > 20) {
+                    clearInterval(interval);
+                    if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // Rung mạnh khi ra số
+                    
+                    screen.innerHTML = `
+                        <div style="width: 100%;">
+                            <div class="label">SỐ CHÍNH TÂM</div>
+                            <h1 class="big-number">${format(results[0])}</h1>
+                            <div style="display: flex; justify-content: space-around; margin-top: 10px;">
+                                <div><div class="label">THUẬN</div><div class="sub-number">${format(results[1])}</div></div>
+                                <div><div class="label">NGHỊCH</div><div class="sub-number">${format(results[2])}</div></div>
+                                <div><div class="label">BIẾN</div><div class="sub-number">${format(results[3])}</div></div>
+                            </div>
+                            <p style="font-size: 9px; color: #30363d; margin-top: 10px;">DATA: ${data.date}</p>
+                        </div>
+                    `;
+                }
+            }, 80);
+
+        } catch (e) {
+            screen.innerHTML = '<p style="color: #f85149;">Lỗi đường truyền!</p>';
+        }
+    }
+</script>
+
 </body>
 </html>
-
