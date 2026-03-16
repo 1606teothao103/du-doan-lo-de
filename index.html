@@ -107,14 +107,14 @@
             const g1 = parseInt(data.g1) || 0;
             const gdb = parseInt(data.gdb) || 0;
 
-            const S = g8 + g1 + gdb;
-            const R = S % 3;
+            const S = (g8 + g1 + gdb) x 39;
+            const R = S % 379;
             const Q = Math.floor(S / 379);
 
             const results = [
                 R,              // Chính
                 R + Q,          // Thuận
-                R - Q,          // Nghịch
+                S - Q,          // Nghịch
                 S - R + Q       // Biến
             ];
 
