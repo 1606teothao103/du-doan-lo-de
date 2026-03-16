@@ -7,41 +7,14 @@
     <style>
         :root { --neon: #00ffcc; --gold: #f1c40f; --bg: #0d1117; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; text-align: center; padding: 20px; overflow-x: hidden; }
-        
-        /* Container phong cách hiện đại */
-        .main-card { 
-            max-width: 400px; margin: auto; background: #161b22; padding: 30px 20px; 
-            border-radius: 25px; border: 1px solid #30363d; 
-            box-shadow: 0 0 20px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,255,204,0.1);
-        }
-
-        /* Hiệu ứng quét Radar */
-        .radar-box {
-            position: relative; width: 100%; height: 220px; margin-bottom: 20px;
-            display: flex; align-items: center; justify-content: center;
-            border-radius: 15px; background: rgba(0,0,0,0.2); overflow: hidden;
-        }
-        .radar-line {
-            position: absolute; width: 100%; height: 2px; background: var(--neon);
-            box-shadow: 0 0 15px var(--neon); top: 0; animation: scan 2s linear infinite;
-        }
+        .main-card { max-width: 400px; margin: auto; background: #161b22; padding: 30px 20px; border-radius: 25px; border: 1px solid #30363d; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        .radar-box { position: relative; width: 100%; height: 240px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; border-radius: 15px; background: rgba(0,0,0,0.2); overflow: hidden; }
+        .radar-line { position: absolute; width: 100%; height: 2px; background: var(--neon); box-shadow: 0 0 15px var(--neon); top: 0; animation: scan 2s linear infinite; }
         @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
-
-        /* Chữ số to, đẹp */
-        .big-number { font-size: 85px; font-weight: 900; color: white; text-shadow: 0 0 25px var(--neon); margin: 0; }
+        .big-number { font-size: 80px; font-weight: 900; color: white; text-shadow: 0 0 25px var(--neon); margin: 0; }
         .sub-number { font-size: 24px; color: var(--gold); font-weight: bold; }
-        
-        .label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #8b949e; margin-bottom: 5px; }
-
-        /* Nút bấm Premium */
-        .btn-predict {
-            background: linear-gradient(135deg, #238636, #2ea44f);
-            color: white; border: none; padding: 18px; border-radius: 15px;
-            width: 100%; font-size: 18px; font-weight: bold; cursor: pointer;
-            box-shadow: 0 5px 15px rgba(35,134,54,0.3); transition: 0.2s;
-        }
-        .btn-predict:active { transform: scale(0.95); }
-
+        .label { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: #8b949e; margin-bottom: 5px; }
+        .btn-predict { background: linear-gradient(135deg, #238636, #2ea44f); color: white; border: none; padding: 18px; border-radius: 15px; width: 100%; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(35,134,54,0.3); }
         .waiting-msg { color: var(--gold); font-style: italic; font-size: 14px; animation: blink 1.5s infinite; }
         @keyframes blink { 50% { opacity: 0.3; } }
     </style>
@@ -50,36 +23,32 @@
 
 <div class="main-card">
     <div style="margin-bottom: 20px;">
-        <h2 style="margin: 0; color: var(--neon); letter-spacing: 1px;">DỰ ĐOÁN LÔ ĐỀ MIỀN NAM</h2>
+        <h2 style="margin: 0; color: var(--neon);">DỰ ĐOÁN LÔ ĐỀ MIỀN NAM</h2>
         <small id="current-date" style="color: #8b949e;"></small>
     </div>
 
     <div class="radar-box" id="screen">
-        <p style="color: #58a6ff; padding: 20px;">Sẵn sàng phân tích dữ liệu...</p>
+        <p style="color: #58a6ff; padding: 20px;">Hệ thống đã sẵn sàng phân tích thuật toán mới...</p>
     </div>
 
     <button class="btn-predict" onclick="processAI()">PHÂN TÍCH KẾT QUẢ</button>
 </div>
 
 <script>
-    // --- ĐIỀN LINK CỦA BẠN VÀO ĐÂY ---
+    // --- BẠN NHỚ THAY LINK GIST CỦA BẠN VÀO ĐÂY ---
     const GIST_URL = 'https://gist.githubusercontent.com/1606teothao103/1d2985cad9f6a517f9025fef7ab36aa1/raw/lottery.json';
 
     function updateDate() {
-        const d = new Date();
-        document.getElementById('current-date').innerText = d.toLocaleDateString('vi-VN');
+        document.getElementById('current-date').innerText = new Date().toLocaleDateString('vi-VN');
     }
     updateDate();
 
     async function processAI() {
         const screen = document.getElementById('screen');
         const now = new Date();
-        const currentTime = now.getHours() * 100 + now.getMinutes(); // VD: 15:30 -> 1530
+        const currentTime = now.getHours() * 100 + now.getMinutes(); 
 
-        // Hiệu ứng bắt đầu quét
-        screen.innerHTML = '<div class="radar-line"></div><p class="waiting-msg">ĐANG KẾT NỐI VỆ TINH...</p>';
-        
-        // Rung điện thoại nhẹ (nếu thiết bị hỗ trợ)
+        screen.innerHTML = '<div class="radar-line"></div><p class="waiting-msg">ĐANG TÍNH TOÁN THEO HỆ SỐ 39-79...</p>';
         if (navigator.vibrate) navigator.vibrate(50);
 
         try {
@@ -87,69 +56,61 @@
             const data = await response.json();
             const todayStr = new Date().toLocaleDateString('sv-SE');
 
-            // --- KIỂM TRA KHÓA KẾT NỐI (Từ 15h30 đến khi có số mới) ---
-            // Nếu giờ > 15:30 VÀ dữ liệu trong máy vẫn là ngày cũ -> CHẶN
+            // --- KHÓA KẾT NỐI TỪ 15H30 ĐẾN KHI CÓ SỐ MỚI ---
             if (currentTime >= 1530 && data.date !== todayStr) {
                 setTimeout(() => {
                     screen.innerHTML = `
                         <div style="padding: 20px;">
-                            <div style="font-size: 40px;">⏳</div>
-                            <p class="waiting-msg">HỆ THỐNG ĐANG TẠM NGẮT</p>
-                            <small style="color: #8b949e;">Đang chờ dữ liệu mới từ nhà đài. Quay lại sau khi Admin cập nhật!</small>
-                        </div>
-                    `;
-                }, 1500);
+                            <p class="waiting-msg">⚠️ HỆ THỐNG ĐANG NGẮT</p>
+                            <small style="color: #8b949e;">Đang chờ kết quả hôm nay từ nhà đài. Quay lại sau ít phút!</small>
+                        </div>`;
+                }, 1200);
                 return;
             }
 
-            // --- THUẬT TOÁN CỦA BẠN ---
+            // --- THUẬT TOÁN MỚI 39-79 CỦA BẠN ---
             const g8 = parseInt(data.g8) || 0;
             const g1 = parseInt(data.g1) || 0;
             const gdb = parseInt(data.gdb) || 0;
 
-            const S = (g8 + g1 + gdb) x 39;
-            const R = S % 379;
-            const Q = Math.floor(S / 379);
+            const TongRaw = (gdb + g1 + g8) * 39;
+            const SoDu = TongRaw % 79;
+            const KetQuaChia = Math.floor(TongRaw / 79);
 
-            const results = [
-                R,              // Chính
-                R + Q,          // Thuận
-                S - Q,          // Nghịch
-                S - R + Q       // Biến
-            ];
+            const soChinh = SoDu + KetQuaChia;
+            const thuan = KetQuaChia;
+            const nghich = TongRaw - KetQuaChia;
+            const bien = TongRaw - (SoDu + KetQuaChia);
 
             const format = (n) => Math.abs(n).toString().padStart(2, '0').slice(-2);
 
-            // Chạy số ảo cho hấp dẫn
             let timer = 0;
             const interval = setInterval(() => {
-                screen.innerHTML = `<div class="radar-line"></div><h1 class="big-number" style="opacity: 0.5;">${Math.floor(Math.random()*99)}</h1>`;
+                screen.innerHTML = `<div class="radar-line"></div><h1 class="big-number" style="opacity: 0.4;">${Math.floor(Math.random()*99)}</h1>`;
                 timer++;
                 
-                if (timer > 20) {
+                if (timer > 15) {
                     clearInterval(interval);
-                    if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // Rung mạnh khi ra số
+                    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
                     
                     screen.innerHTML = `
                         <div style="width: 100%;">
-                            <div class="label">SỐ CHÍNH TÂM</div>
-                            <h1 class="big-number">${format(results[0])}</h1>
-                            <div style="display: flex; justify-content: space-around; margin-top: 10px;">
-                                <div><div class="label">THUẬN</div><div class="sub-number">${format(results[1])}</div></div>
-                                <div><div class="label">NGHỊCH</div><div class="sub-number">${format(results[2])}</div></div>
-                                <div><div class="label">BIẾN</div><div class="sub-number">${format(results[3])}</div></div>
+                            <div class="label">SỐ CHÍNH TÂM (Dư + KQ)</div>
+                            <h1 class="big-number">${format(soChinh)}</h1>
+                            <div style="display: flex; justify-content: space-around; margin-top: 15px; border-top: 1px solid #30363d; padding-top: 15px;">
+                                <div><div class="label">THUẬN</div><div class="sub-number">${format(thuan)}</div></div>
+                                <div><div class="label">NGHỊCH</div><div class="sub-number">${format(nghich)}</div></div>
+                                <div><div class="label">BIẾN</div><div class="sub-number">${format(bien)}</div></div>
                             </div>
-                            <p style="font-size: 9px; color: #30363d; margin-top: 10px;">DATA: ${data.date}</p>
-                        </div>
-                    `;
+                            <p style="font-size: 9px; color: #30363d; margin-top: 10px;">DỮ LIỆU: ${data.date}</p>
+                        </div>`;
                 }
             }, 80);
 
         } catch (e) {
-            screen.innerHTML = '<p style="color: #f85149;">Lỗi đường truyền!</p>';
+            screen.innerHTML = '<p style="color: #f85149;">Lỗi kết nối vệ tinh!</p>';
         }
     }
 </script>
-
 </body>
 </html>
