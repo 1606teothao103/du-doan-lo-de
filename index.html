@@ -95,14 +95,14 @@
                     
                     screen.innerHTML = `
                         <div style="width: 100%;">
-                            <div class="label">SỐ CHÍNH TÂM (Dư + KQ)</div>
+                            <div class="label">SỐ CHÍNH</div>
                             <h1 class="big-number">${format(soChinh)}</h1>
                             <div style="display: flex; justify-content: space-around; margin-top: 15px; border-top: 1px solid #30363d; padding-top: 15px;">
                                 <div><div class="label">THUẬN</div><div class="sub-number">${format(thuan)}</div></div>
                                 <div><div class="label">NGHỊCH</div><div class="sub-number">${format(nghich)}</div></div>
                                 <div><div class="label">BIẾN</div><div class="sub-number">${format(bien)}</div></div>
                             </div>
-                            <p style="font-size: 9px; color: #30363d; margin-top: 10px;">DỮ LIỆU: ${data.date}</p>
+                            <p style="font-size: 9px; color: #30363d; margin-top: 10px;">DỮ LIỆU: ${data.date}-1</p>
                         </div>`;
                 }
             }, 80);
